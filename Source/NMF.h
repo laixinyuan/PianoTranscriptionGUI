@@ -14,34 +14,28 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include <iostream>
 
-#ifndef FFT_SIZE
-#define FFT_SIZE          4096
-#endif
-#ifndef DOWN_SAMPLE_RATE
-#define DOWN_SAMPLE_RATE  2
-#endif
-#ifndef N_NOTES
-#define N_NOTES           88
-#endif
-
 class NMF
 {
 public:
     NMF();
-    NMF(const char* filename);
     ~NMF();
     void factorize(float* v, float* h);
-    float betaDivergence(float beta, float* v, float* h);
+    float getBetaDivergence(float* v, float* h);
+    
     
 private:
     float **W;
-    float cnvgThreshold;
-    float beta;
-    float noteThreshold;
-//    static const int FFT_SIZE = 4096;
-//    static const int DOWN_SAMPLE_RATE = 2;
-//    static const int N_NOTES = 88;
-//    static const int ITERATE_LIMIT = 100;
+    const int FFT_SIZE;
+    const int N_NOTES;
+    const float BETA;
+    const int ITERATE_LIMIT;
+    const float CONVERGE_THRESHOLD;
+    const float ACTIVATION_TRESHOLD;
+    
+    float*  W_h;          // W*h, intermediate variable for beta divergence calculation, 512*1
+    float** W_v_eT;       // 512*88
+    float*  numerator;    // 88*1
+    float*  denominator;  // 88*1
 };
 
 #endif /* defined(__PianoTranscriptionGUI__NMF__) */

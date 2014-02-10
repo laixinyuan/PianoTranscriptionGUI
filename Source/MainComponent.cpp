@@ -13,10 +13,14 @@
 MainContentComponent::MainContentComponent()
 {
     setSize (500, 400);
+    nmf = new NMF();
+    
+    startTimer(10);
 }
 
 MainContentComponent::~MainContentComponent()
 {
+    delete nmf;
 }
 
 void MainContentComponent::paint (Graphics& g)
@@ -34,3 +38,10 @@ void MainContentComponent::resized()
     // If you add any child components, this is where you should
     // update their positions.
 }
+
+void MainContentComponent::timerCallback()
+{
+    
+}
+
+
