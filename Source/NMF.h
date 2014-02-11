@@ -28,8 +28,8 @@ public:
     void addWindow(float* audioSamples, int nSamples);
     void downsampleFillBuffer(float* audioSamples, int nSamples);
     
-    void factorize(float* v, float* h);
-    float getBetaDivergence(float* v, float* h);
+    void factorize(float* h);
+    float getBetaDivergence(float* h);
     
     
 private:

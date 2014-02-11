@@ -13,7 +13,7 @@
 #include <fstream>
 #include <cmath>
 
-NMF::NMF(): FFT_SIZE(1024), N_NOTES(88), BETA(0.5), ITERATE_LIMIT(100), CONVERGE_THRESHOLD(0.01), ACTIVATION_TRESHOLD(0.15)
+NMF::NMF(): SAMPLE_RATE(44100), DOWNSAMPLE_RATE(3), FFT_SIZE(1024), N_NOTES(88), BETA(0.5), ITERATE_LIMIT(100), CONVERGE_THRESHOLD(0.01), ACTIVATION_TRESHOLD(0.15)
 {
     
     W = new float*[FFT_SIZE/2];
@@ -77,7 +77,19 @@ NMF::~NMF()
 }
 
 
-
+void NMF::Process(float *audioSamples, float *transcription, int nSamples)
+{
+    antiAlias(audioSamples, nSamples);
+    addWindow(audioSamples, nSamples);
+    downsampleFillBuffer(audioSamples, nSamples);
+    
+    fft->XForm(fftBuffer);
+    for (int i = 0; i<FFT_SIZE/2; i++) {
+        v[i] = fftBuffer[i];
+    }
+    
+    factorize(transcription);
+}
 
 
 void NMF::antiAlias(float *audioSamples, int nSamples)
@@ -131,7 +143,7 @@ void NMF::downsampleFillBuffer(float *audioSamples, int nSamples)
 }
 
 
-float NMF::getBetaDivergence(float *v, float *h)
+float NMF::getBetaDivergence(float *h)
 {
     float db = 0;
     
@@ -172,7 +184,7 @@ float NMF::getBetaDivergence(float *v, float *h)
 }
 
 
-void NMF::factorize(float* v, float* h) //length(v)=FFT_SIZE/2; length(h)=N_NOTES;
+void NMF::factorize(float* h) //length(v)=FFT_SIZE/2; length(h)=N_NOTES;
 {
     int count = 0;
     
@@ -189,7 +201,7 @@ void NMF::factorize(float* v, float* h) //length(v)=FFT_SIZE/2; length(h)=N_NOTE
     }
     
     // h = h.* ( ( W_v_eT'* (W*h).^(beta-2) ) ./ ( W'*(W*h).^(beta-1)) );
-    while (getBetaDivergence(v, h) > CONVERGE_THRESHOLD && count++ < ITERATE_LIMIT) {
+    while (getBetaDivergence(h) > CONVERGE_THRESHOLD && count++ < ITERATE_LIMIT) {
         
         // W*h
         for (int i=0; i<FFT_SIZE/2; i++) {
