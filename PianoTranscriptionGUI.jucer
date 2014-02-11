@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="gdKGxT" name="PianoTranscriptionGUI" projectType="guiapp"
+<JUCERPROJECT id="dNzLQj" name="PianoTranscriptionGUI" projectType="guiapp"
               version="1.0.0" bundleIdentifier="com.yourcompany.PianoTranscriptionGUI"
-              includeBinaryInAppConfig="1" jucerVersion="3.1.0">
-  <MAINGROUP id="iuQb37" name="PianoTranscriptionGUI">
-    <GROUP id="{DA065CF1-75F7-B58B-E7E6-8F277DC3E095}" name="Source">
-      <FILE id="QgtKa0" name="MainComponent.cpp" compile="1" resource="0"
-            file="Source/MainComponent.cpp"/>
-      <FILE id="NAdA71" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
-      <FILE id="kaUvUI" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
+              includeBinaryInAppConfig="1" jucerVersion="3.1.0" buildVST="1"
+              buildAU="1" pluginName="PianoTranscriptionGUI" pluginDesc="PianoTranscriptionGUI"
+              pluginManufacturer="yourcompany" pluginManufacturerCode="Manu"
+              pluginCode="Plug" pluginChannelConfigs="{1, 1}, {2, 2}" pluginIsSynth="0"
+              pluginWantsMidiIn="0" pluginProducesMidiOut="0" pluginSilenceInIsSilenceOut="0"
+              pluginEditorRequiresKeys="0" pluginAUExportPrefix="PianoTranscriptionGUIAU"
+              pluginRTASCategory="" aaxIdentifier="com.yourcompany.PianoTranscriptionGUI"
+              pluginAAXCategory="AAX_ePlugInCategory_Dynamics">
+  <MAINGROUP id="G24nq7" name="PianoTranscriptionGUI">
+    <GROUP id="{4A1F1BF7-8637-FDAF-6FD3-F6A8DA719282}" name="Source">
+      <FILE id="xwKEyF" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
@@ -33,6 +37,7 @@
         <MODULEPATH id="juce_audio_devices" path="../JUCE/modules"/>
         <MODULEPATH id="juce_audio_formats" path="../JUCE/modules"/>
         <MODULEPATH id="juce_audio_processors" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../JUCE/modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
   </EXPORTFORMATS>
@@ -41,6 +46,7 @@
     <MODULES id="juce_audio_devices" showAllCode="1" useLocalCopy="1"/>
     <MODULES id="juce_audio_formats" showAllCode="1" useLocalCopy="1"/>
     <MODULES id="juce_audio_processors" showAllCode="1" useLocalCopy="1"/>
+    <MODULES id="juce_audio_utils" showAllCode="1" useLocalCopy="1"/>
     <MODULES id="juce_core" showAllCode="1" useLocalCopy="1"/>
     <MODULES id="juce_cryptography" showAllCode="1" useLocalCopy="1"/>
     <MODULES id="juce_data_structures" showAllCode="1" useLocalCopy="1"/>

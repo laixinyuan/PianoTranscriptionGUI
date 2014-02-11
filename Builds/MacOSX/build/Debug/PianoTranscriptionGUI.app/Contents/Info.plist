@@ -7,7 +7,7 @@
 	<key>CFBundleExecutable</key>
 	<string>PianoTranscriptionGUI</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.shin.PianoTranscriptionGUI</string>
+	<string>com.yourcompany.PianoTranscriptionGUI</string>
 	<key>CFBundleName</key>
 	<string>PianoTranscriptionGUI</string>
 	<key>CFBundlePackageType</key>

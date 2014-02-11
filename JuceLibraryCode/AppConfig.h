@@ -11,8 +11,8 @@
 
 */
 
-#ifndef __JUCE_APPCONFIG_GDKGXT__
-#define __JUCE_APPCONFIG_GDKGXT__
+#ifndef __JUCE_APPCONFIG_DNZLQJ__
+#define __JUCE_APPCONFIG_DNZLQJ__
 
 //==============================================================================
 // [BEGIN_USER_CODE_SECTION]
@@ -26,6 +26,7 @@
 #define JUCE_MODULE_AVAILABLE_juce_audio_devices         1
 #define JUCE_MODULE_AVAILABLE_juce_audio_formats         1
 #define JUCE_MODULE_AVAILABLE_juce_audio_processors      1
+#define JUCE_MODULE_AVAILABLE_juce_audio_utils           1
 #define JUCE_MODULE_AVAILABLE_juce_core                  1
 #define JUCE_MODULE_AVAILABLE_juce_cryptography          1
 #define JUCE_MODULE_AVAILABLE_juce_data_structures       1
@@ -193,4 +194,4 @@
 #endif
 
 
-#endif  // __JUCE_APPCONFIG_GDKGXT__
+#endif  // __JUCE_APPCONFIG_DNZLQJ__

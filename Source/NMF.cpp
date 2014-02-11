@@ -31,6 +31,9 @@ NMF::NMF(): FFT_SIZE(1024), N_NOTES(88), BETA(0.5), ITERATE_LIMIT(100), CONVERGE
     numerator   = new float[N_NOTES];
     denominator = new float[N_NOTES];
     
+    fftBuffer = new float[FFT_SIZE];
+    v         = new float[FFT_SIZE/2];
+    
     // read in dictionary from file
     std::ifstream fin;
     std::string line;
@@ -44,6 +47,8 @@ NMF::NMF(): FFT_SIZE(1024), N_NOTES(88), BETA(0.5), ITERATE_LIMIT(100), CONVERGE
             W[row][col] = std::stof(line);
         }
     }
+    
+    fft = new SplitRadixFFT(FFT_SIZE);
     
 }
 
@@ -64,6 +69,65 @@ NMF::~NMF()
     
     delete [] numerator;
     delete [] denominator;
+    
+    delete [] fftBuffer;
+    delete [] v;
+    
+    delete fft;
+}
+
+
+
+
+
+void NMF::antiAlias(float *audioSamples, int nSamples)
+{
+    float Q = 2;
+    float K = tan(M_PI/DOWNSAMPLE_RATE);
+    
+    float b0 = K*K*Q/(K*K*Q+K+Q);
+    float b1 = 2*K*K*Q/(K*K*Q+K+Q);
+    float b2 = K*K*Q/(K*K*Q+K+Q);
+    float a1 = 2*Q*(K*K-1)/(K*K*Q+K+Q);
+    float a2 = (K*K*Q-K+Q)/(K*K*Q+K+Q);
+    
+    float* xh = new float[nSamples];
+    
+    xh[0] = audioSamples[0];
+    audioSamples[0] = b0*xh[0];
+    
+    xh[1] = audioSamples[1]-a1*xh[0];
+    audioSamples[1] = b0*xh[1] + b1*xh[0];
+    
+    for (int i = 2; i<nSamples; i++) {
+        xh[i] = audioSamples[i] - a1*xh[i-1] - a2*xh[i-2];
+        audioSamples[i] = b0*xh[i] + b1*xh[i-1] + b2*xh[i-2];
+    }
+    
+    delete [] xh;
+}
+
+
+void NMF::addWindow(float *audioSamples, int nSamples)
+{
+    for (int i = 0; i<nSamples; i++) {
+        audioSamples[i] *= 0.54 - 0.46*cos( 2*M_PI*( (float)i/(nSamples-1) )  );
+    }
+}
+
+void NMF::downsampleFillBuffer(float *audioSamples, int nSamples)
+{
+    // clear buffer
+    for (int i=0; i<FFT_SIZE; i++) {
+        fftBuffer[i] = 0;
+    }
+    
+    int i = 0;
+    
+    while (i*DOWNSAMPLE_RATE < nSamples) {
+        fftBuffer[i] = audioSamples[i*DOWNSAMPLE_RATE];
+        i++;
+    }
 }
 
 
