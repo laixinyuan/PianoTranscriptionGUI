@@ -24,17 +24,18 @@ public:
     ~NMF();
     void Process(float* audioSamples, float* transcription, int nSamples);
     
+protected:
     void antiAlias(float* audioSamples, int nSamples);
-    void addWindow(float* audioSamples, int nSamples);
+    void addHammWindow(float* audioSamples, int nSamples);
     void downsampleFillBuffer(float* audioSamples, int nSamples);
     
     void factorize(float* h);
     float getBetaDivergence(float* h);
     
-    
 private:
     float SAMPLE_RATE;
     int   DOWNSAMPLE_RATE;
+    int   FFT_ORDER;
     int   FFT_SIZE;
     int   N_NOTES;
     float BETA;
@@ -49,8 +50,8 @@ private:
     float** W_v_eT;       // 512*88
     float*  numerator;    // 88*1
     float*  denominator;  // 88*1
-    float*  fftBuffer;     // buffer for FFT
-    float*  v;             // half the FFT point. For factorization.
+    float*  fftBuffer;    // buffer for FFT
+    float*  v;            // half the FFT point. For factorization.
     
 };
 

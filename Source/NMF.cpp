@@ -13,7 +13,10 @@
 #include <fstream>
 #include <cmath>
 
-NMF::NMF(): SAMPLE_RATE(44100), DOWNSAMPLE_RATE(3), FFT_SIZE(1024), N_NOTES(88), BETA(0.5), ITERATE_LIMIT(100), CONVERGE_THRESHOLD(0.01), ACTIVATION_TRESHOLD(0.15)
+//using std::cout;
+//using std::endl;
+
+NMF::NMF(): SAMPLE_RATE(44100), DOWNSAMPLE_RATE(3), FFT_ORDER(10), FFT_SIZE(1024), N_NOTES(88), BETA(0.5), ITERATE_LIMIT(100), CONVERGE_THRESHOLD(0.01), ACTIVATION_TRESHOLD(0.15)
 {
     
     W = new float*[FFT_SIZE/2];
@@ -48,8 +51,19 @@ NMF::NMF(): SAMPLE_RATE(44100), DOWNSAMPLE_RATE(3), FFT_SIZE(1024), N_NOTES(88),
         }
     }
     
-    fft = new SplitRadixFFT(FFT_SIZE);
     
+//    std::fstream fout;
+//    fout.open("WW.txt", std::ios::out);
+//    for (int j = 0; j<N_NOTES; j++)
+//    {
+//        for (int i = 0; i<FFT_SIZE/2;i++) {
+//            fout<<W[i][j]<<std::endl;
+//        }
+//    }
+//    fout.close();
+    
+    
+    fft = new SplitRadixFFT(FFT_ORDER);
 }
 
 
@@ -80,18 +94,22 @@ NMF::~NMF()
 void NMF::Process(float *audioSamples, float *transcription, int nSamples)
 {
     antiAlias(audioSamples, nSamples);
-    addWindow(audioSamples, nSamples);
+    addHammWindow(audioSamples, nSamples);
     downsampleFillBuffer(audioSamples, nSamples);
     
+    
     fft->XForm(fftBuffer);
+    
+
     for (int i = 0; i<FFT_SIZE/2; i++) {
-        v[i] = fftBuffer[i];
+        v[i] = abs(fftBuffer[i]);
+        std::cout<<"v"<<i<<": "<<v[i]<<std::endl;
     }
     
     factorize(transcription);
 }
 
-
+// low pass anti-aliasing filter
 void NMF::antiAlias(float *audioSamples, int nSamples)
 {
     float Q = 2;
@@ -103,24 +121,22 @@ void NMF::antiAlias(float *audioSamples, int nSamples)
     float a1 = 2*Q*(K*K-1)/(K*K*Q+K+Q);
     float a2 = (K*K*Q-K+Q)/(K*K*Q+K+Q);
     
-    float* xh = new float[nSamples];
+    float xh  = 0;
+    float xh1 = 0;
+    float xh2 = 0;
     
-    xh[0] = audioSamples[0];
-    audioSamples[0] = b0*xh[0];
-    
-    xh[1] = audioSamples[1]-a1*xh[0];
-    audioSamples[1] = b0*xh[1] + b1*xh[0];
-    
-    for (int i = 2; i<nSamples; i++) {
-        xh[i] = audioSamples[i] - a1*xh[i-1] - a2*xh[i-2];
-        audioSamples[i] = b0*xh[i] + b1*xh[i-1] + b2*xh[i-2];
+    for (int i = 0; i<nSamples; i++) {
+        xh = audioSamples[i] - a1*xh1 - a2*xh2;
+        audioSamples[i] = b0*xh + b1*xh1 + b2*xh2;
+        
+        xh2 = xh1;
+        xh1 = xh;
     }
     
-    delete [] xh;
+    
 }
 
-
-void NMF::addWindow(float *audioSamples, int nSamples)
+void NMF::addHammWindow(float *audioSamples, int nSamples)
 {
     for (int i = 0; i<nSamples; i++) {
         audioSamples[i] *= 0.54 - 0.46*cos( 2*M_PI*( (float)i/(nSamples-1) )  );
@@ -135,7 +151,6 @@ void NMF::downsampleFillBuffer(float *audioSamples, int nSamples)
     }
     
     int i = 0;
-    
     while (i*DOWNSAMPLE_RATE < nSamples) {
         fftBuffer[i] = audioSamples[i*DOWNSAMPLE_RATE];
         i++;
@@ -200,15 +215,25 @@ void NMF::factorize(float* h) //length(v)=FFT_SIZE/2; length(h)=N_NOTES;
         }
     }
     
+//    for (int i = 0; i<FFT_SIZE/2; i++) {
+//        for (int j = 0; j<N_NOTES; j++) {
+//            cout<<W_v_eT[i][j]<<"\t";
+//        }
+//        cout<<endl<<endl;
+//    }
+    
     // h = h.* ( ( W_v_eT'* (W*h).^(beta-2) ) ./ ( W'*(W*h).^(beta-1)) );
     while (getBetaDivergence(h) > CONVERGE_THRESHOLD && count++ < ITERATE_LIMIT) {
         
         // W*h
         for (int i=0; i<FFT_SIZE/2; i++) {
+            W_h[i] = 0;
             for (int j=0; j<N_NOTES; j++) {
                 W_h[i] += W[i][j]*h[j];
             }
         }
+        
+        
         
         // ( W_v_eT'* (W*h).^(beta-2)
         for (int j = 0; j<N_NOTES; j++) {
@@ -222,7 +247,7 @@ void NMF::factorize(float* h) //length(v)=FFT_SIZE/2; length(h)=N_NOTES;
         for (int j = 0; j<N_NOTES; j++) {
             denominator[j] = 0;
             for (int i = 0; i<FFT_SIZE/2; i++) {
-                denominator[j] = W[i][j] * pow(W_h[i], BETA-1.0);
+                denominator[j] += W[i][j] * pow(W_h[i], BETA-1.0);
             }
         }
         
@@ -231,9 +256,19 @@ void NMF::factorize(float* h) //length(v)=FFT_SIZE/2; length(h)=N_NOTES;
             h[j] = h[j]*numerator[j]/denominator[j];
         }
         
+//        for (int j = 0; j<N_NOTES; j++) {
+//            std::cout<<h[j]<<"\t";
+//        }
+//        
+//        std::cout<<std::endl<<std::endl;
+        
     }
     
-    //normalization
+//    for (int j = 0; j<N_NOTES; j++) {
+//        std::cout<<h[j]<<"\t";
+//    }
+    
+    // normalization
     float max = 0;
     for (int j = 0; j<N_NOTES; j++) {
         if (h[j]>max) {
@@ -245,3 +280,5 @@ void NMF::factorize(float* h) //length(v)=FFT_SIZE/2; length(h)=N_NOTES;
     }
     
 }
+
+
