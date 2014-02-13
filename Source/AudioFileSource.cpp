@@ -6,7 +6,7 @@
 //
 //
 
-#include "FileStreaming.h"
+#include "AudioFileSource.h"
 
 AudioFileSource::AudioFileSource(AudioDeviceManager& deviceManager_):deviceManager(deviceManager_), playingThread("file audio IO")
 {

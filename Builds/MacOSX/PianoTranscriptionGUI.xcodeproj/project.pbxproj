@@ -28,7 +28,7 @@
 		54AD5F8A18A91FFA0081EC6E /* MainComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 54AD5F8618A91FFA0081EC6E /* MainComponent.cpp */; };
 		54AD5F8B18A91FFA0081EC6E /* NMF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 54AD5F8818A91FFA0081EC6E /* NMF.cpp */; };
 		54AD5F8E18A9209C0081EC6E /* LiveStreaming.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 54AD5F8C18A9209C0081EC6E /* LiveStreaming.cpp */; };
-		54AD5F9418A932FB0081EC6E /* FileStreaming.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 54AD5F9218A932FB0081EC6E /* FileStreaming.cpp */; };
+		54AD5F9418A932FB0081EC6E /* AudioFileSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 54AD5F9218A932FB0081EC6E /* AudioFileSource.cpp */; };
 		556F5B7CA38C12826F5D1A54 /* juce_graphics.mm in Sources */ = {isa = PBXBuildFile; fileRef = B2711F4ED0F0BA2434E8438B /* juce_graphics.mm */; };
 		5BB5195A81F101307ACAB43C /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 101E4ADC9168FF66F00EE264 /* OpenGL.framework */; };
 		655CFF2F220C2B022D170075 /* juce_events.mm in Sources */ = {isa = PBXBuildFile; fileRef = 45264A89CB7198100B42F9B0 /* juce_events.mm */; };
@@ -363,8 +363,8 @@
 		54AD5F8918A91FFA0081EC6E /* NMF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NMF.h; path = ../../Source/NMF.h; sourceTree = "<group>"; };
 		54AD5F8C18A9209C0081EC6E /* LiveStreaming.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LiveStreaming.cpp; path = ../../Source/LiveStreaming.cpp; sourceTree = "<group>"; };
 		54AD5F8D18A9209C0081EC6E /* LiveStreaming.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LiveStreaming.h; path = ../../Source/LiveStreaming.h; sourceTree = "<group>"; };
-		54AD5F9218A932FB0081EC6E /* FileStreaming.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FileStreaming.cpp; path = ../../Source/FileStreaming.cpp; sourceTree = "<group>"; };
-		54AD5F9318A932FB0081EC6E /* FileStreaming.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FileStreaming.h; path = ../../Source/FileStreaming.h; sourceTree = "<group>"; };
+		54AD5F9218A932FB0081EC6E /* AudioFileSource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AudioFileSource.cpp; path = ../../Source/AudioFileSource.cpp; sourceTree = "<group>"; };
+		54AD5F9318A932FB0081EC6E /* AudioFileSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AudioFileSource.h; path = ../../Source/AudioFileSource.h; sourceTree = "<group>"; };
 		5543B3BF9AED8897AC92DC5E /* juce_PluginDirectoryScanner.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_PluginDirectoryScanner.cpp; path = ../../JuceLibraryCode/modules/juce_audio_processors/scanning/juce_PluginDirectoryScanner.cpp; sourceTree = SOURCE_ROOT; };
 		565060946432D476D5C2AFF2 /* juce_KnownPluginList.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_KnownPluginList.cpp; path = ../../JuceLibraryCode/modules/juce_audio_processors/scanning/juce_KnownPluginList.cpp; sourceTree = SOURCE_ROOT; };
 		565D29D5EC2E51A9C14ADC13 /* juce_StringArray.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_StringArray.h; path = ../../JuceLibraryCode/modules/juce_core/text/juce_StringArray.h; sourceTree = SOURCE_ROOT; };
@@ -1290,8 +1290,8 @@
 				109CE4E627D91B7214AB3AC6 /* Main.cpp */,
 				54AD5F8C18A9209C0081EC6E /* LiveStreaming.cpp */,
 				54AD5F8D18A9209C0081EC6E /* LiveStreaming.h */,
-				54AD5F9218A932FB0081EC6E /* FileStreaming.cpp */,
-				54AD5F9318A932FB0081EC6E /* FileStreaming.h */,
+				54AD5F9218A932FB0081EC6E /* AudioFileSource.cpp */,
+				54AD5F9318A932FB0081EC6E /* AudioFileSource.h */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -2773,7 +2773,7 @@
 				3A6FDD5CA97EBA70F684648C /* juce_audio_basics.mm in Sources */,
 				BB16BEE389FD0F7AF074F5B9 /* juce_audio_devices.mm in Sources */,
 				14659A398AEFDE5976D2D26E /* juce_audio_formats.mm in Sources */,
-				54AD5F9418A932FB0081EC6E /* FileStreaming.cpp in Sources */,
+				54AD5F9418A932FB0081EC6E /* AudioFileSource.cpp in Sources */,
 				0662A1A649B43EA1C47DE8CD /* juce_audio_processors.mm in Sources */,
 				4E4DA0B2EEE65833CED68C86 /* juce_audio_utils.mm in Sources */,
 				5402FAD118AACA2300A44D05 /* rsrfft.cxx in Sources */,

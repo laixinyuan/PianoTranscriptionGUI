@@ -11,6 +11,8 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "NMF.h"
+#include "AudioFileSource.h"
+#include "LiveStreaming.h"
 
 
 //==============================================================================
@@ -18,7 +20,7 @@
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class MainContentComponent   : public Component, public Timer
+class MainContentComponent   : public Component, public Timer, public ButtonListener
 {
 public:
     //==============================================================================
@@ -30,9 +32,23 @@ public:
     
     void timerCallback();
     
-    NMF* nmf;
-
+    void buttonClicked(Button* buttonThatWasClicked);
+    
 private:
+    AudioDeviceManager deviceManager;
+    File currentFile;
+//    Path internalPath1;
+    
+    ScopedPointer<Label> title;
+    ScopedPointer<TextButton> streamButton;
+    ScopedPointer<TextButton> loadFileButton;
+    
+    MidiKeyboardState keyboardState;
+    ScopedPointer<MidiKeyboardComponent> keyboardUI;
+    
+    ScopedPointer<LiveStreaming> streaming;
+    ScopedPointer<AudioFileSource> player;
+    
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)
 };
