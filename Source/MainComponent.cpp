@@ -12,14 +12,11 @@
 //==============================================================================
 MainContentComponent::MainContentComponent()
 {
-    setSize (900, 600);
-    
-    startTimer(10);
     
     deviceManager.initialise(2, 2, 0, true);
     
     nmf = new NMF();
-    transcription = new float(nmf->getNumNotes());
+    transcription = new float[88];
     
     addAndMakeVisible (title = new Label (String::empty, "Real-time Polyphonic "));
     title->setFont (Font (28.00f, Font::bold));
@@ -41,9 +38,13 @@ MainContentComponent::MainContentComponent()
     
     addAndMakeVisible(keyboardUI = new MidiKeyboardComponent(keyboardState, MidiKeyboardComponent::horizontalKeyboard));
     keyboardUI->setAvailableRange(21, 108);
-    keyboardUI->setKeyWidth(20.f);
+    keyboardUI->setKeyWidth(18.f);
     keyboardUI->setColour(MidiKeyboardComponent::keyDownOverlayColourId, Colours::mediumseagreen);
     keyboardUI->setColour(MidiKeyboardComponent::mouseOverKeyOverlayColourId, Colours::mediumseagreen);
+    
+    setSize (1080, 720);
+    
+    startTimer(10);
     
 }
 
@@ -77,12 +78,14 @@ void MainContentComponent::resized()
     // This is called when the MainContentComponent is resized.
     // If you add any child components, this is where you should
     // update their positions.
-//    title->setBounds (getWidth()/2-160, 20, 400, 200);
-//    streamButton->setBounds (getWidth()/8, getHeight()/4-80, 120, 30);
-//    loadFileButton->setBounds (getWidth()/8 + 120, getHeight()/4-80, 120, 30);
-//    
-//    keyboardUI ->setBounds(getWidth()/8-30, getHeight()/2 + 10, 350, getHeight()/2 - 70);
-//    
+    
+    
+    
+    title->setBounds (getWidth()/2-160, 20, 400, 200);
+    streamButton->setBounds (getWidth()/8, getHeight()/4-80, 120, 30);
+    loadFileButton->setBounds (getWidth()/8 + 120, getHeight()/4-80, 120, 30);
+    keyboardUI ->setBounds(getWidth()/8-30, getHeight()/2 + 10, 900, getHeight()/2 - 70);
+    
 //    internalPath1.clear();
 //    internalPath1.startNewSubPath (136.0f, 80.0f);
 //    internalPath1.quadraticTo (176.0f, 24.0f, 328.0f, 32.0f);
@@ -138,7 +141,7 @@ void MainContentComponent::buttonClicked(Button *buttonThatWasClicked)
 void MainContentComponent::timerCallback()
 {
     keyboardState.allNotesOff(1);
-    for (int j = 0; j<nmf->getNumNotes(); j++) {
+    for (int j = 0; j<88; j++) {
         if (transcription[j] == 1) {
             keyboardState.noteOn(1, j+21, 127);
         }
