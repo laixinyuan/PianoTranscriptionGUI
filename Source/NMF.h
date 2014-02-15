@@ -23,6 +23,7 @@ public:
     NMF();
     ~NMF();
     void Process(float* audioSamples, float* transcription, int nSamples);
+    int getNumNotes(){return N_NOTES;};
     
 protected:
     void antiAlias(float* audioSamples, int nSamples);

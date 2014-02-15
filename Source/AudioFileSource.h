@@ -13,11 +13,21 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
+#include "NMF.h"
+
+#ifndef RECORD_SIZE
+#define RECORD_SIZE 2205
+#endif
+
+#ifndef HOP_SIZE
+#define HOP_SIZE 1024
+#endif
+
 
 class AudioFileSource : public AudioIODeviceCallback
 {
 public:
-    AudioFileSource(AudioDeviceManager& deviceManager);
+    AudioFileSource(AudioDeviceManager& deviceManager, ScopedPointer<NMF> nmf_, float* transcription_);
     ~AudioFileSource();
     void audioDeviceIOCallback(const float** inputChannelData,
 							   int totalNumInputChannels,
@@ -28,6 +38,7 @@ public:
     void audioDeviceStopped();
     void setFile(File audioFile);
     
+    void loadBuffer();
     
 private:
     
@@ -38,9 +49,14 @@ private:
     AudioFormatManager formatManager;
     TimeSliceThread playingThread;
     
-    AudioSampleBuffer sampleBuffer = AudioSampleBuffer(1,1024); //the buffer is for store;
-    AudioSampleBuffer calculateBuffer = AudioSampleBuffer(1,1024); //the buffer is throwing to the pitchtail
-    AudioSampleBuffer tempBuffer = AudioSampleBuffer(1,1024); // this buffer is for sliding buffer window
+    AudioSampleBuffer sampleBuffer = AudioSampleBuffer(1,RECORD_SIZE); //the buffer is for store;
+    AudioSampleBuffer calculateBuffer = AudioSampleBuffer(1,RECORD_SIZE); //the buffer is throwing to the pitchtail
+    AudioSampleBuffer tempBuffer = AudioSampleBuffer(1,RECORD_SIZE); // this buffer is for sliding buffer window
+    
+    ScopedPointer<NMF> nmf;
+    float* nmfBuffer;
+    float* transcription;
+    
     bool bufferReady;
     int bufferIndex;
     

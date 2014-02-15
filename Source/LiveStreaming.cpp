@@ -8,17 +8,20 @@
 
 #include "LiveStreaming.h"
 
-LiveStreaming::LiveStreaming(AudioDeviceManager& deviceManager_):deviceManager(deviceManager_), sampleBuffer(1, 1024), liveStreamingThread("real time IO")
+LiveStreaming::LiveStreaming(AudioDeviceManager& deviceManager_, ScopedPointer<NMF> nmf_, float* transcription_):deviceManager(deviceManager_), liveStreamingThread("real time IO")
 {
     AudioDeviceManager::AudioDeviceSetup config;
     deviceManager.getAudioDeviceSetup(config);
-    config.bufferSize = 512;
+    config.bufferSize = HOP_SIZE;
     
     deviceManager.setAudioDeviceSetup(config, true);
     deviceManager.addAudioCallback(this);
     streamingAlive = true;
     bufferReady = false;
     
+    nmf = nmf_;
+    transcription = transcription_;
+    nmfBuffer = new float[RECORD_SIZE];
 
 }
 
@@ -26,6 +29,9 @@ LiveStreaming::~LiveStreaming()
 {
     deviceManager.removeAudioCallback(this);
     streamingAlive = false;
+    nmf = nullptr;
+    transcription = nullptr;
+    delete [] nmfBuffer;
 }
 
 void LiveStreaming::audioDeviceAboutToStart(AudioIODevice* device)
@@ -46,27 +52,36 @@ void LiveStreaming::audioDeviceIOCallback( const float** inputChannelData,
 {
     
     //get sample here
-//    if (bufferReady == true)
-//    {
-//        pitchTracking(calculateBuffer.getSampleData(0));
-//        bufferReady = false;
-//    }
-//    
-//    if (bufferReady == false)
-//    {
-//        sampleBuffer.copyFrom(0, 0, inputChannelData[0], numSamples);
-//        tempBuffer.copyFrom(0, 0, calculateBuffer, 0, numSamples, RECORDSIZE - numSamples);
-//        calculateBuffer.clear();
-//        tempBuffer.copyFrom(0, RECORDSIZE - numSamples, sampleBuffer, 0, 0, numSamples);
-//        calculateBuffer.copyFrom(0, 0, tempBuffer, 0, 0, RECORDSIZE);
-//        tempBuffer.clear();
-//        bufferReady = true;
-//        sampleBuffer.clear();
-//    }
+    if (bufferReady == true)
+    {
+        loadBuffer();
+        nmf->Process(nmfBuffer, transcription, RECORD_SIZE);
+        bufferReady = false;
+    }
+    
+    if (bufferReady == false)
+    {
+        sampleBuffer.copyFrom(0, 0, inputChannelData[0], numSamples);
+        tempBuffer.copyFrom(0, 0, calculateBuffer, 0, numSamples, RECORD_SIZE - numSamples);
+        calculateBuffer.clear();
+        tempBuffer.copyFrom(0, RECORD_SIZE - numSamples, sampleBuffer, 0, 0, numSamples);
+        calculateBuffer.copyFrom(0, 0, tempBuffer, 0, 0, RECORD_SIZE);
+        tempBuffer.clear();
+        bufferReady = true;
+        sampleBuffer.clear();
+    }
     
     
     for (int i = 0; i < numSamples; ++i)
         for (int j = totalNumOutputChannels; --j >= 0;)
             outputChannelData[j][i] = 0;
     
+}
+
+void LiveStreaming::loadBuffer()
+{
+    float* calBuffer = calculateBuffer.getSampleData(0);
+    for (int i = 0; i<RECORD_SIZE; i++) {
+        nmfBuffer[i] = calBuffer[i];
+    }
 }

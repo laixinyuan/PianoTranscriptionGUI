@@ -8,11 +8,11 @@
 
 #include "AudioFileSource.h"
 
-AudioFileSource::AudioFileSource(AudioDeviceManager& deviceManager_):deviceManager(deviceManager_), playingThread("file audio IO")
+AudioFileSource::AudioFileSource(AudioDeviceManager& deviceManager_, ScopedPointer<NMF> nmf_, float* transcription_):deviceManager(deviceManager_), playingThread("file audio IO")
 {
     AudioDeviceManager::AudioDeviceSetup config;
     deviceManager.getAudioDeviceSetup(config);
-    config.bufferSize = 512;
+    config.bufferSize = HOP_SIZE;
     
     deviceManager.setAudioDeviceSetup(config, true);
     
@@ -24,6 +24,9 @@ AudioFileSource::AudioFileSource(AudioDeviceManager& deviceManager_):deviceManag
     bufferReady = false;
     bufferIndex = 0;
     
+    nmf = nmf_;
+    transcription = transcription_;
+    nmfBuffer = new float[RECORD_SIZE];
     
 }
 
@@ -34,6 +37,9 @@ AudioFileSource::~AudioFileSource()
     deleteAndZero(fileSource);
     audioSourcePlayer.setSource(0);
     
+    nmf = nullptr;
+    transcription = nullptr;
+    delete [] nmfBuffer;
 }
 
 void AudioFileSource::setFile(File audioFile)
@@ -54,16 +60,18 @@ void AudioFileSource::audioDeviceIOCallback(const float** inputChannelData,
     
     if (bufferReady == true)
     {
+        loadBuffer();
+        nmf->Process(nmfBuffer, transcription, RECORD_SIZE);
         bufferReady = false;
     }
     
     if (bufferReady == false)
     {
         sampleBuffer.copyFrom(0, 0, outputChannelData[0], numSamples);
-        tempBuffer.copyFrom(0, 0, calculateBuffer, 0, numSamples, 1024 - numSamples);
+        tempBuffer.copyFrom(0, 0, calculateBuffer, 0, numSamples, RECORD_SIZE - numSamples);
         calculateBuffer.clear();
-        tempBuffer.copyFrom(0, 1024 - numSamples, sampleBuffer, 0, 0, numSamples);
-        calculateBuffer.copyFrom(0, 0, tempBuffer, 0, 0, 1024);
+        tempBuffer.copyFrom(0, RECORD_SIZE - numSamples, sampleBuffer, 0, 0, numSamples);
+        calculateBuffer.copyFrom(0, 0, tempBuffer, 0, 0, RECORD_SIZE);
         tempBuffer.clear();
         bufferReady = true;
         sampleBuffer.clear();
@@ -73,7 +81,13 @@ void AudioFileSource::audioDeviceIOCallback(const float** inputChannelData,
     
 }
 
-
+void AudioFileSource::loadBuffer()
+{
+    float* calBuffer = calculateBuffer.getSampleData(0);
+    for (int i = 0; i<RECORD_SIZE; i++) {
+        nmfBuffer[i] = calBuffer[i];
+    }
+}
 
 void AudioFileSource::audioDeviceAboutToStart(AudioIODevice* device)
 {

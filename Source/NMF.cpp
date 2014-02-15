@@ -103,7 +103,7 @@ void NMF::Process(float *audioSamples, float *transcription, int nSamples)
 
     for (int i = 0; i<FFT_SIZE/2; i++) {
         v[i] = abs(fftBuffer[i]);
-        std::cout<<"v"<<i<<": "<<v[i]<<std::endl;
+//        std::cout<<"v"<<i<<": "<<v[i]<<std::endl;
     }
     
     factorize(transcription);
@@ -158,45 +158,6 @@ void NMF::downsampleFillBuffer(float *audioSamples, int nSamples)
 }
 
 
-float NMF::getBetaDivergence(float *h)
-{
-    float db = 0;
-    
-    // W*h
-    for (int i=0; i<FFT_SIZE/2; i++) {
-        for (int j=0; j<N_NOTES; j++) {
-            W_h[i] += W[i][j]*h[j];
-        }
-    }
-    
-    // db = sum (x./y - log(x./y) - 1);
-    if (BETA == 0) {
-        for (int i=0; i<FFT_SIZE/2; i++) {
-            if (W_h[i]!=0) {
-                db += v[i]/W_h[i] - log(v[i]/W_h[i]) - 1;
-            }
-        }
-    }
-    
-    
-    // db = sum( x.*log(x./y) + y - x );
-    else if (BETA == 1){
-        for (int i=0; i<FFT_SIZE/2; i++) {
-            if (W_h[i]!=0) {
-                db += v[i]*log(v[i]/W_h[i]) + W_h[i] - v[i];
-            }
-        }
-    }
-    
-    
-    // db = sum( 1/(beta*(beta-1)) * ( x.^beta + (beta-1)*y.^beta - beta.*x.*y.^(beta-1) ) );
-    else {
-        for (int i=0; i<FFT_SIZE/2; i++) {
-            db += 1/(BETA*(BETA-1)) * ( pow(v[i], BETA) + (BETA-1)*pow(W_h[i], BETA) - BETA*v[i]*pow(W_h[i], BETA-1) );
-        }
-    }
-    return db;
-}
 
 
 void NMF::factorize(float* h) //length(v)=FFT_SIZE/2; length(h)=N_NOTES;
@@ -268,7 +229,7 @@ void NMF::factorize(float* h) //length(v)=FFT_SIZE/2; length(h)=N_NOTES;
 //        std::cout<<h[j]<<"\t";
 //    }
     
-    // normalization
+    // normalization and dichotomize
     float max = 0;
     for (int j = 0; j<N_NOTES; j++) {
         if (h[j]>max) {
@@ -278,7 +239,54 @@ void NMF::factorize(float* h) //length(v)=FFT_SIZE/2; length(h)=N_NOTES;
     for (int j = 0; j<N_NOTES; j++) {
         h[j] /= max;
     }
+    for (int j = 0; j<N_NOTES; j++) {
+        if (h[j] > ACTIVATION_TRESHOLD)
+            h[j] = 1;
+        else
+            h[j] = 0;
+    }
     
 }
 
 
+
+float NMF::getBetaDivergence(float *h)
+{
+    float db = 0;
+    
+    // W*h
+    for (int i=0; i<FFT_SIZE/2; i++) {
+        W_h[i] = 0;
+        for (int j=0; j<N_NOTES; j++) {
+            W_h[i] += W[i][j]*h[j];
+        }
+    }
+    
+    // db = sum (x./y - log(x./y) - 1);
+    if (BETA == 0) {
+        for (int i=0; i<FFT_SIZE/2; i++) {
+            if (W_h[i]!=0) {
+                db += v[i]/W_h[i] - log(v[i]/W_h[i]) - 1;
+            }
+        }
+    }
+    
+    
+    // db = sum( x.*log(x./y) + y - x );
+    else if (BETA == 1){
+        for (int i=0; i<FFT_SIZE/2; i++) {
+            if (W_h[i]!=0) {
+                db += v[i]*log(v[i]/W_h[i]) + W_h[i] - v[i];
+            }
+        }
+    }
+    
+    
+    // db = sum( 1/(beta*(beta-1)) * ( x.^beta + (beta-1)*y.^beta - beta.*x.*y.^(beta-1) ) );
+    else {
+        for (int i=0; i<FFT_SIZE/2; i++) {
+            db += 1/(BETA*(BETA-1)) * ( pow(v[i], BETA) + (BETA-1)*pow(W_h[i], BETA) - BETA*v[i]*pow(W_h[i], BETA-1) );
+        }
+    }
+    return db;
+}

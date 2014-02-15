@@ -49,6 +49,10 @@ private:
     ScopedPointer<LiveStreaming> streaming;
     ScopedPointer<AudioFileSource> player;
     
+    ScopedPointer<NMF> nmf;
+    
+    float* transcription;
+    
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)
 };

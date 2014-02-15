@@ -15,29 +15,40 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
+#ifndef RECORD_SIZE
+#define RECORD_SIZE 2205
+#endif
+
+#ifndef HOP_SIZE
+#define HOP_SIZE 1024
+#endif
+
 class LiveStreaming: public AudioIODeviceCallback
 {
 public:
-    LiveStreaming(AudioDeviceManager& deviceManager);
+    LiveStreaming(AudioDeviceManager& deviceManager, ScopedPointer<NMF> nmf_, float* transcription_);
     ~LiveStreaming();
     
     void audioDeviceIOCallback (const float **inputChannelData, int numInputChannels, float **outputChannelData, int numOutputChannels, int numSamples);
     void audioDeviceAboutToStart (AudioIODevice* device);;
     void audioDeviceStopped();
     
-private:
-    AudioDeviceManager& deviceManager;                          // global device manager
-    AudioSourcePlayer audioSourcePlayer;
-    AudioFormatReaderSource* fileSource;
-    AudioTransportSource transportSource;
-    AudioFormatManager formatManager;
-    AudioSampleBuffer sampleBuffer;
-    TimeSliceThread liveStreamingThread;
+    void loadBuffer();
     
-    NMF nmf;
+private:
+    AudioDeviceManager& deviceManager;
+    TimeSliceThread liveStreamingThread;
+    AudioSampleBuffer sampleBuffer = AudioSampleBuffer(1, RECORD_SIZE);
+    AudioSampleBuffer calculateBuffer = AudioSampleBuffer(1,RECORD_SIZE);
+    AudioSampleBuffer tempBuffer   = AudioSampleBuffer(1, RECORD_SIZE);
+    
+    ScopedPointer<NMF> nmf;
+    float* transcription;
+    float* nmfBuffer;
     
     bool bufferReady;
     bool streamingAlive;
+    int bufferIndex;
 };
 
 #endif /* defined(__PianoTranscriptionGUI__LiveStreaming__) */

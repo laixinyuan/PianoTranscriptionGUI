@@ -18,6 +18,9 @@ MainContentComponent::MainContentComponent()
     
     deviceManager.initialise(2, 2, 0, true);
     
+    nmf = new NMF();
+    transcription = new float(nmf->getNumNotes());
+    
     addAndMakeVisible (title = new Label (String::empty, "Real-time Polyphonic "));
     title->setFont (Font (28.00f, Font::bold));
     title->setJustificationType (Justification::topLeft);
@@ -54,6 +57,10 @@ MainContentComponent::~MainContentComponent()
     
     streaming = nullptr;
     player = nullptr;
+    
+    nmf = nullptr;
+    
+    delete [] transcription;
 }
 
 void MainContentComponent::paint (Graphics& g)
@@ -95,7 +102,7 @@ void MainContentComponent::buttonClicked(Button *buttonThatWasClicked)
         if (!streaming)
         {
             player = nullptr;
-            streaming = new LiveStreaming(deviceManager);
+            streaming = new LiveStreaming(deviceManager, nmf, transcription);
             streamButton->setButtonText("Streaming on");
             streamButton->setColour(TextButton::buttonColourId, Colours::blue);
         }
@@ -117,7 +124,7 @@ void MainContentComponent::buttonClicked(Button *buttonThatWasClicked)
             currentFile = File(chooser.getResult());
             if (!player)
             {
-                player = new AudioFileSource(deviceManager);
+                player = new AudioFileSource(deviceManager, nmf, transcription);
                 player->setFile(currentFile);
                 std::cout<< "load file: "<<currentFile.getFileName()<<std::endl;
             }
@@ -130,7 +137,12 @@ void MainContentComponent::buttonClicked(Button *buttonThatWasClicked)
 
 void MainContentComponent::timerCallback()
 {
-    
+    keyboardState.allNotesOff(1);
+    for (int j = 0; j<nmf->getNumNotes(); j++) {
+        if (transcription[j] == 1) {
+            keyboardState.noteOn(1, j+21, 127);
+        }
+    }
 }
 
 
