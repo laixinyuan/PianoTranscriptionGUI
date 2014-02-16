@@ -16,7 +16,7 @@
 //using std::cout;
 //using std::endl;
 
-NMF::NMF(): SAMPLE_RATE(44100), DOWNSAMPLE_RATE(3), FFT_ORDER(10), FFT_SIZE(1024), N_NOTES(88), BETA(0.5), ITERATE_LIMIT(3), CONVERGE_THRESHOLD(0.01), ACTIVATION_TRESHOLD(0.15)
+NMF::NMF(): SAMPLE_RATE(44100), DOWNSAMPLE_RATE(5), FFT_ORDER(9), FFT_SIZE(512), N_NOTES(88), BETA(0.5), NOISE_GATE(0.01), ITERATE_LIMIT(20), CONVERGE_THRESHOLD(0.01), ACTIVATION_TRESHOLD(0.15)
 {
     
     W = new float*[FFT_SIZE/2];
@@ -93,20 +93,35 @@ NMF::~NMF()
 
 void NMF::Process(float *audioSamples, float *transcription, int nSamples)
 {
-    antiAlias(audioSamples, nSamples);
-    addHammWindow(audioSamples, nSamples);
-    downsampleFillBuffer(audioSamples, nSamples);
+    // compute rms of block
+    float rms = 0;
+    for (int i = 0; i<nSamples; i++) {
+        rms += audioSamples[i]+audioSamples[i];
+    }
+    rms /= nSamples;
+    rms = sqrt(rms);
     
-    
-    fft->XForm(fftBuffer);
-    
-
-    for (int i = 0; i<FFT_SIZE/2; i++) {
-        v[i] = abs(fftBuffer[i]);
-//        std::cout<<"v"<<i<<": "<<v[i]<<std::endl;
+//    if (rms > NOISE_GATE) {
+    if (1) {
+        antiAlias(audioSamples, nSamples);
+        addHammWindow(audioSamples, nSamples);
+        downsampleFillBuffer(audioSamples, nSamples);
+        
+        fft->XForm(fftBuffer);
+        
+        for (int i = 0; i<FFT_SIZE/2; i++) {
+            v[i] = abs(fftBuffer[i]);
+        }
+        
+        factorize(transcription);
     }
     
-    factorize(transcription);
+    else {
+        for (int j = 0; j<N_NOTES; j++) {
+            transcription[j] = 0;
+        }
+    }
+    
 }
 
 // low pass anti-aliasing filter
@@ -160,7 +175,7 @@ void NMF::downsampleFillBuffer(float *audioSamples, int nSamples)
 
 
 
-void NMF::factorize(float* h) //length(v)=FFT_SIZE/2; length(h)=N_NOTES;
+void NMF::factorize(float* h) 
 {
     int count = 0;
     
