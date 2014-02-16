@@ -15,8 +15,8 @@ MainContentComponent::MainContentComponent()
     
     deviceManager.initialise(2, 2, 0, true);
     
-    nmf = new NMF();
-    transcription = new float[88];
+//    nmf = new NMF();
+//    transcription = new float[88];
     
     addAndMakeVisible (title = new Label (String::empty, "Real-time Polyphonic "));
     title->setFont (Font (28.00f, Font::bold));
@@ -59,9 +59,8 @@ MainContentComponent::~MainContentComponent()
     streaming = nullptr;
     player = nullptr;
     
-    nmf = nullptr;
-    
-    delete [] transcription;
+//    nmf = nullptr;
+//    delete [] transcription;
 }
 
 void MainContentComponent::paint (Graphics& g)
@@ -105,7 +104,7 @@ void MainContentComponent::buttonClicked(Button *buttonThatWasClicked)
         if (!streaming)
         {
             player = nullptr;
-            streaming = new LiveStreaming(deviceManager, nmf, transcription);
+            streaming = new LiveStreaming(deviceManager);
             streamButton->setButtonText("Streaming on");
             streamButton->setColour(TextButton::buttonColourId, Colours::blue);
         }
@@ -127,7 +126,7 @@ void MainContentComponent::buttonClicked(Button *buttonThatWasClicked)
             currentFile = File(chooser.getResult());
             if (!player)
             {
-                player = new AudioFileSource(deviceManager, nmf, transcription);
+                player = new AudioFileSource(deviceManager);
                 player->setFile(currentFile);
                 std::cout<< "load file: "<<currentFile.getFileName()<<std::endl;
             }
@@ -141,10 +140,15 @@ void MainContentComponent::buttonClicked(Button *buttonThatWasClicked)
 void MainContentComponent::timerCallback()
 {
     keyboardState.allNotesOff(1);
-    for (int j = 0; j<88; j++) {
-        if (transcription[j] == 1) {
-            keyboardState.noteOn(1, j+21, 127);
-        }
+    if(streaming) {
+        for (int j = 0; j<88; j++)
+            if (streaming->transcription[j] == 1)
+                keyboardState.noteOn(1, j+21, 127);
+    }
+    else if (player) {
+        for (int j = 0; j<88; j++)
+            if (player->transcription[j] == 1)
+                keyboardState.noteOn(1, j+21, 127);
     }
 }
 
