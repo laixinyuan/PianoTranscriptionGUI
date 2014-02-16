@@ -27,7 +27,7 @@
 class AudioFileSource : public AudioIODeviceCallback
 {
 public:
-    AudioFileSource(AudioDeviceManager& deviceManager);
+    AudioFileSource(AudioDeviceManager& deviceManager, ScopedPointer<NMF> nmf_, float* transcription_);
     ~AudioFileSource();
     void audioDeviceIOCallback(const float** inputChannelData,
 							   int totalNumInputChannels,
@@ -39,8 +39,6 @@ public:
     void setFile(File audioFile);
     
     void loadBuffer();
-    
-    float* transcription;
     
 private:
     
@@ -57,6 +55,7 @@ private:
     
     ScopedPointer<NMF> nmf;
     float* nmfBuffer;
+    float* transcription;
     
     bool bufferReady;
     int bufferIndex;
