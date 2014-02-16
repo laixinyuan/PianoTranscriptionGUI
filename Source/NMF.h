@@ -40,7 +40,6 @@ private:
     int   FFT_SIZE;
     int   N_NOTES;
     float BETA;
-    float NOISE_GATE;
     int   ITERATE_LIMIT;
     float CONVERGE_THRESHOLD;
     float ACTIVATION_TRESHOLD;
