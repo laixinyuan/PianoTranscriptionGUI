@@ -44,7 +44,7 @@ MainContentComponent::MainContentComponent()
     
     setSize (1080, 720);
     
-    startTimer(10);
+    startTimer(25);
     
 }
 
@@ -59,8 +59,7 @@ MainContentComponent::~MainContentComponent()
     streaming = nullptr;
     player = nullptr;
     
-    nmf = nullptr;
-    
+    delete nmf;
     delete [] transcription;
 }
 
@@ -86,15 +85,6 @@ void MainContentComponent::resized()
     loadFileButton->setBounds (getWidth()/8 + 120, getHeight()/4-80, 120, 30);
     keyboardUI ->setBounds(getWidth()/8-30, getHeight()/2 + 10, 900, getHeight()/2 - 70);
     
-//    internalPath1.clear();
-//    internalPath1.startNewSubPath (136.0f, 80.0f);
-//    internalPath1.quadraticTo (176.0f, 24.0f, 328.0f, 32.0f);
-//    internalPath1.quadraticTo (472.0f, 40.0f, 472.0f, 104.0f);
-//    internalPath1.quadraticTo (472.0f, 192.0f, 232.0f, 176.0f);
-//    internalPath1.lineTo (184.0f, 216.0f);
-//    internalPath1.lineTo (200.0f, 168.0f);
-//    internalPath1.quadraticTo (96.0f, 136.0f, 136.0f, 80.0f);
-//    internalPath1.closeSubPath();
 }
 
 void MainContentComponent::buttonClicked(Button *buttonThatWasClicked)
@@ -125,12 +115,13 @@ void MainContentComponent::buttonClicked(Button *buttonThatWasClicked)
             FileChooser chooser (("Choose file to open"),File::nonexistent,"*",true);
             chooser.browseForFileToOpen();
             currentFile = File(chooser.getResult());
-            if (!player)
-            {
-                player = new AudioFileSource(deviceManager, nmf, transcription);
-                player->setFile(currentFile);
-                std::cout<< "load file: "<<currentFile.getFileName()<<std::endl;
-            }
+//            if (!player)
+//            {
+            player = nullptr;
+            player = new AudioFileSource(deviceManager, nmf, transcription);
+            player->setFile(currentFile);
+            std::cout<< "load file: "<<currentFile.getFileName()<<std::endl;
+//            }
             
         }
     }

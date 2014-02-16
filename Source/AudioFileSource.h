@@ -27,7 +27,7 @@
 class AudioFileSource : public AudioIODeviceCallback
 {
 public:
-    AudioFileSource(AudioDeviceManager& deviceManager, ScopedPointer<NMF> nmf_, float* transcription_);
+    AudioFileSource(AudioDeviceManager& deviceManager, NMF* nmf_, float* transcription_);
     ~AudioFileSource();
     void audioDeviceIOCallback(const float** inputChannelData,
 							   int totalNumInputChannels,
@@ -53,7 +53,7 @@ private:
     AudioSampleBuffer calculateBuffer = AudioSampleBuffer(1,RECORD_SIZE); //the buffer is throwing to the pitchtail
     AudioSampleBuffer tempBuffer = AudioSampleBuffer(1,RECORD_SIZE); // this buffer is for sliding buffer window
     
-    ScopedPointer<NMF> nmf;
+    NMF* nmf;
     float* nmfBuffer;
     float* transcription;
     

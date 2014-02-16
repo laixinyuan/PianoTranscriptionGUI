@@ -49,8 +49,7 @@ private:
     ScopedPointer<LiveStreaming> streaming;
     ScopedPointer<AudioFileSource> player;
     
-    ScopedPointer<NMF> nmf;
-    
+    NMF* nmf;
     float* transcription;
     
     //==============================================================================

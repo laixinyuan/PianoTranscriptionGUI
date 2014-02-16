@@ -8,7 +8,7 @@
 
 #include "AudioFileSource.h"
 
-AudioFileSource::AudioFileSource(AudioDeviceManager& deviceManager_, ScopedPointer<NMF> nmf_, float* transcription_):deviceManager(deviceManager_), playingThread("file audio IO")
+AudioFileSource::AudioFileSource(AudioDeviceManager& deviceManager_, NMF* nmf_, float* transcription_):deviceManager(deviceManager_), playingThread("file audio IO")
 {
     AudioDeviceManager::AudioDeviceSetup config;
     deviceManager.getAudioDeviceSetup(config);

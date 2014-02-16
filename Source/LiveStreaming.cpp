@@ -8,7 +8,7 @@
 
 #include "LiveStreaming.h"
 
-LiveStreaming::LiveStreaming(AudioDeviceManager& deviceManager_, ScopedPointer<NMF> nmf_, float* transcription_):deviceManager(deviceManager_), liveStreamingThread("real time IO")
+LiveStreaming::LiveStreaming(AudioDeviceManager& deviceManager_, NMF* nmf_, float* transcription_):deviceManager(deviceManager_), liveStreamingThread("real time IO")
 {
     AudioDeviceManager::AudioDeviceSetup config;
     deviceManager.getAudioDeviceSetup(config);
