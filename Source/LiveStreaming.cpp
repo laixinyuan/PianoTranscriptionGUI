@@ -56,6 +56,13 @@ void LiveStreaming::audioDeviceIOCallback( const float** inputChannelData,
     {
         loadBuffer();
         nmf->Process(nmfBuffer, transcription, RECORD_SIZE);
+        
+        std::cout<<"Process complete"<<std::endl;
+        for (int j = 0; j<88; j++) {
+            std::cout<<transcription[j]<<"\t";
+        }
+        std::cout<<std::endl<<std::endl;
+        
         bufferReady = false;
     }
     

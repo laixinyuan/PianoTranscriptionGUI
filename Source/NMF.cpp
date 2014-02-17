@@ -264,27 +264,38 @@ void NMF::factorize(float* h)
 //        std::cout<<h[j]<<"\t";
 //    }
     
-    // normalization and dichotomize
-    float max = 0;
-    for (int j = 0; j<N_NOTES; j++) {
-        if (h[j]>max) {
-            max = h[j];
+    cout<<"dBeta = "<<getBetaDivergence(h)<<endl;
+    
+    if (getBetaDivergence(h)) {
+        
+        // for valid input, normalize and dichotomize
+        float max = 0;
+        for (int j = 0; j<N_NOTES; j++) {
+            if (h[j]>max) {
+                max = h[j];
+            }
+        }
+        for (int j = 0; j<N_NOTES; j++) {
+            h[j] /= max;
+        }
+        for (int j = 0; j<N_NOTES; j++) {
+            if (h[j] > ACTIVATION_TRESHOLD)
+                h[j] = 1;
+            else
+                h[j] = 0;
         }
     }
-    for (int j = 0; j<N_NOTES; j++) {
-        h[j] /= max;
-    }
-    for (int j = 0; j<N_NOTES; j++) {
-        if (h[j] > ACTIVATION_TRESHOLD)
-            h[j] = 1;
-        else
+    else {
+        
+        // for invalid input, just output all zero
+        for (int j = 0; j<N_NOTES; j++) {
             h[j] = 0;
+        }
     }
     
 //    for (int j = 0; j<N_NOTES; j++)
 //        std::cout<<h[j]<<"\t";
 //    cout<<endl;
-    cout<<"dBeta = "<<getBetaDivergence(h)<<endl;
 }
 
 

@@ -67,6 +67,12 @@ void AudioFileSource::audioDeviceIOCallback(const float** inputChannelData,
 //            std::cout<<transcription[j]<<"\t";
 //        std::cout<<std::endl;
         
+        std::cout<<"Process complete"<<std::endl;
+        for (int j = 0; j<88; j++) {
+            std::cout<<transcription[j]<<"\t";
+        }
+        std::cout<<std::endl<<std::endl;
+        
         bufferReady = false;
     }
     
