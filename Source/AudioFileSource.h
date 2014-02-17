@@ -55,7 +55,8 @@ private:
     
     NMF* nmf;
     float* nmfBuffer;
-    float* transcription;
+    float* transcription; // final results
+    float* h;             // intermediate resultes
     
     bool bufferReady;
     int bufferIndex;

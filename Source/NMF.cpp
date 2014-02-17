@@ -16,7 +16,7 @@
 using std::cout;
 using std::endl;
 
-NMF::NMF(): SAMPLE_RATE(44100), DOWNSAMPLE_RATE(5), FFT_ORDER(9), FFT_SIZE(512), N_NOTES(88), BETA(0.5), NOISE_GATE(0.00005), ITERATE_LIMIT(100), CONVERGE_THRESHOLD(0.01), ACTIVATION_TRESHOLD(0.15)
+NMF::NMF(): SAMPLE_RATE(44100), DOWNSAMPLE_RATE(5), FFT_ORDER(9), FFT_SIZE(512), N_NOTES(88), BETA(0.5), NOISE_GATE(0), ITERATE_LIMIT(10), CONVERGE_THRESHOLD(0.01), ACTIVATION_TRESHOLD(0.15)
 {
     
     W = new float*[FFT_SIZE/2];
@@ -100,38 +100,21 @@ void NMF::Process(float *audioSamples, float *transcription, int nSamples)
     rms /= nSamples;
     rms = sqrt(rms);
     
+    cout<<rms<<endl;
+    
 //    if (rms > NOISE_GATE) {
     if (1) {
         antiAlias(audioSamples, nSamples);
         addHammWindow(audioSamples, nSamples);
         downsampleFillBuffer(audioSamples, nSamples);
         
-//        cout<<"audioSamples: "<<endl;
-//        for (int i = 0; i<nSamples; i++) {
-//            cout<<audioSamples[i]<<"\t";
-//        }
-//        cout<<endl<<endl<<endl;
-        
         fft->XForm(fftBuffer);
-        
-//        cout<<"spectrum"<<endl;
-//        for (int i = 0; i<FFT_SIZE; i++) {
-//            cout<<fftBuffer[i]<<"\t";
-//        }
-//        cout<<endl<<endl<<endl;
-        
         
         // get FFT magnitude and load into v
         v[0] = abs(fftBuffer[0]);
         for (int i = 1; i<FFT_SIZE/2; i++) {
             v[i] = sqrt(fftBuffer[i]*fftBuffer[i]+fftBuffer[FFT_SIZE-i]*fftBuffer[FFT_SIZE-i]);
         }
-        
-//        cout<<"v"<<endl;
-//        for (int i = 0; i<FFT_SIZE/2; i++) {
-//            cout<<v[i]<<"\t";
-//        }
-//        cout<<endl<<endl<<endl;
         
         factorize(transcription);
     }
@@ -211,13 +194,6 @@ void NMF::factorize(float* h)
         }
     }
     
-//    for (int i = 0; i<FFT_SIZE/2; i++) {
-//        for (int j = 0; j<N_NOTES; j++) {
-//            cout<<W_v_eT[i][j]<<"\t";
-//        }
-//        cout<<endl<<endl;
-//    }
-    
     // h = h.* ( ( W_v_eT'* (W*h).^(beta-2) ) ./ ( W'*(W*h).^(beta-1)) );
     while (getBetaDivergence(h) > CONVERGE_THRESHOLD && count++ < ITERATE_LIMIT) {
         
@@ -231,40 +207,31 @@ void NMF::factorize(float* h)
         
         
         
-        // ( W_v_eT'* (W*h).^(beta-2)
+       
         for (int j = 0; j<N_NOTES; j++) {
+            
+             // ( W_v_eT'* (W*h).^(beta-2)
             numerator[j] = 0;
             for (int i = 0; i<FFT_SIZE/2; i++) {
                 numerator[j] += W_v_eT[i][j] * pow(W_h[i], BETA-2.0);
             }
-        }
-        
-        // ( W'*(W*h).^(beta-1))
-        for (int j = 0; j<N_NOTES; j++) {
+            
+            // ( W'*(W*h).^(beta-1))
             denominator[j] = 0;
             for (int i = 0; i<FFT_SIZE/2; i++) {
                 denominator[j] += W[i][j] * pow(W_h[i], BETA-1.0);
             }
-        }
-        
-        // h = h.* ( ( W_v_eT'* (W*h).^(beta-2) ) ./ ( W'*(W*h).^(beta-1)) );
-        for (int j = 0; j<N_NOTES; j++) {
+            
+            // h = h.* ( ( W_v_eT'* (W*h).^(beta-2) ) ./ ( W'*(W*h).^(beta-1)) );
             h[j] = h[j]*numerator[j]/denominator[j];
+            
         }
-        
-//        for (int j = 0; j<N_NOTES; j++) {
-//            std::cout<<h[j]<<"\t";
-//        }
-//        
-//        std::cout<<std::endl<<std::endl;
         
     }
     
-//    for (int j = 0; j<N_NOTES; j++) {
-//        std::cout<<h[j]<<"\t";
-//    }
+
     
-    cout<<"dBeta = "<<getBetaDivergence(h)<<endl;
+//    cout<<"dBeta = "<<getBetaDivergence(h)<<endl;
     
     if (getBetaDivergence(h)) {
         
@@ -277,8 +244,7 @@ void NMF::factorize(float* h)
         }
         for (int j = 0; j<N_NOTES; j++) {
             h[j] /= max;
-        }
-        for (int j = 0; j<N_NOTES; j++) {
+            
             if (h[j] > ACTIVATION_TRESHOLD)
                 h[j] = 1;
             else
@@ -286,16 +252,12 @@ void NMF::factorize(float* h)
         }
     }
     else {
-        
         // for invalid input, just output all zero
         for (int j = 0; j<N_NOTES; j++) {
             h[j] = 0;
         }
     }
-    
-//    for (int j = 0; j<N_NOTES; j++)
-//        std::cout<<h[j]<<"\t";
-//    cout<<endl;
+
 }
 
 
@@ -334,14 +296,11 @@ float NMF::getBetaDivergence(float *h)
     
     // db = sum( 1/(beta*(beta-1)) * ( x.^beta + (beta-1)*y.^beta - beta.*x.*y.^(beta-1) ) );
     else {
-//        for (int i = 0; i<FFT_SIZE/2; i++) {
-//            cout<<v[i]<<"\t";
-//        }
         
         for (int i=0; i<FFT_SIZE/2; i++) {
-//            cout<<v[i]<<"\t";
+
             db += 1/(BETA*(BETA-1)) * ( pow(v[i], BETA) + (BETA-1)*pow(W_h[i], BETA) - BETA*v[i]*pow(W_h[i], BETA-1) );
-//            cout<<db<<endl;
+
         }
     }
     

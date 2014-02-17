@@ -37,7 +37,6 @@ public:
 private:
     AudioDeviceManager deviceManager;
     File currentFile;
-//    Path internalPath1;
     
     ScopedPointer<Label> title;
     ScopedPointer<TextButton> streamButton;

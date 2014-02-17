@@ -27,6 +27,7 @@ AudioFileSource::AudioFileSource(AudioDeviceManager& deviceManager_, NMF* nmf_, 
     nmf = nmf_;
     transcription = transcription_;
     nmfBuffer = new float[RECORD_SIZE];
+    h = new float[nmf->getNumNotes()];
     
 }
 
@@ -40,6 +41,7 @@ AudioFileSource::~AudioFileSource()
     nmf = nullptr;
     transcription = nullptr;
     delete [] nmfBuffer;
+    delete [] h;
 }
 
 void AudioFileSource::setFile(File audioFile)
@@ -61,17 +63,21 @@ void AudioFileSource::audioDeviceIOCallback(const float** inputChannelData,
     if (bufferReady == true)
     {
         loadBuffer();
-        nmf->Process(nmfBuffer, transcription, RECORD_SIZE);
+        nmf->Process(nmfBuffer, h, RECORD_SIZE);
+        memcpy(transcription, h, nmf->getNumNotes()*sizeof(float));
+//        for (int j = 0; j<nmf->getNumNotes(); j++) {
+//            transcription[j] = h[j];
+//        }
         
 //        for (int j = 0; j<88; j++)
 //            std::cout<<transcription[j]<<"\t";
 //        std::cout<<std::endl;
         
-        std::cout<<"Process complete"<<std::endl;
-        for (int j = 0; j<88; j++) {
-            std::cout<<transcription[j]<<"\t";
-        }
-        std::cout<<std::endl<<std::endl;
+//        std::cout<<"Process complete"<<std::endl;
+//        for (int j = 0; j<88; j++) {
+//            std::cout<<h[j]<<"\t";
+//        }
+//        std::cout<<std::endl<<std::endl;
         
         bufferReady = false;
     }

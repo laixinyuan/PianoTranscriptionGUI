@@ -45,6 +45,7 @@ private:
     NMF* nmf;
     float* transcription;
     float* nmfBuffer;
+    float* h;
     
     bool bufferReady;
     bool streamingAlive;

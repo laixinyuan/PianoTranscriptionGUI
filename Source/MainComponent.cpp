@@ -44,7 +44,7 @@ MainContentComponent::MainContentComponent()
     
     setSize (1080, 720);
     
-    startTimer(1000);
+    startTimer(10);
     
 }
 
@@ -131,10 +131,6 @@ void MainContentComponent::buttonClicked(Button *buttonThatWasClicked)
 
 void MainContentComponent::timerCallback()
 {
-    std::cout<<"Timer Call Back!!"<<std::endl;
-    for (int j = 0; j<88; j++)
-        std::cout<<transcription[j]<<"\t";
-    std::cout<<std::endl;
     
     for (int j = 0; j<88; j++) {
         if (transcription[j] == 1) {
