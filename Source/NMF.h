@@ -33,6 +33,11 @@ protected:
     void factorize(float* h);
     float getBetaDivergence(float* h);
     
+    inline float pow0_5(float a) { return sqrtf(a); };
+    inline float powMinus0_5(float a) { return 1/sqrtf(a); };
+    inline float powMinus1_5(float a) { return 1/(a*sqrtf(a)); };
+    
+    
 private:
     float SAMPLE_RATE;
     int   DOWNSAMPLE_RATE;
