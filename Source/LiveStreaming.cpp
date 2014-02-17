@@ -8,7 +8,7 @@
 
 #include "LiveStreaming.h"
 
-LiveStreaming::LiveStreaming(AudioDeviceManager& deviceManager_, NMF* nmf_, float* transcription_):deviceManager(deviceManager_), liveStreamingThread("real time IO")
+LiveStreaming::LiveStreaming(AudioDeviceManager& deviceManager_, NMF* nmf_):deviceManager(deviceManager_), liveStreamingThread("real time IO")
 {
     AudioDeviceManager::AudioDeviceSetup config;
     deviceManager.getAudioDeviceSetup(config);
@@ -20,7 +20,7 @@ LiveStreaming::LiveStreaming(AudioDeviceManager& deviceManager_, NMF* nmf_, floa
     bufferReady = false;
     
     nmf = nmf_;
-    transcription = transcription_;
+    transcription = new float[nmf->getNumNotes()];
     nmfBuffer = new float[RECORD_SIZE];
 
 }
@@ -30,7 +30,8 @@ LiveStreaming::~LiveStreaming()
     deviceManager.removeAudioCallback(this);
     streamingAlive = false;
     nmf = nullptr;
-    transcription = nullptr;
+//    transcription = nullptr;
+    delete [] transcription;
     delete [] nmfBuffer;
 }
 
