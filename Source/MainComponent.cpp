@@ -16,7 +16,7 @@ MainContentComponent::MainContentComponent()
     deviceManager.initialise(2, 2, 0, true);
     
     nmf = new NMF();
-    transcription = new float[88];
+    transcription = new float[88];  // hard coded
     
     addAndMakeVisible (title = new Label (String::empty, "Real-time Polyphonic "));
     title->setFont (Font (28.00f, Font::bold));
@@ -44,7 +44,7 @@ MainContentComponent::MainContentComponent()
     
     setSize (1080, 720);
     
-    startTimer(25);
+    startTimer(1000);
     
 }
 
@@ -131,10 +131,17 @@ void MainContentComponent::buttonClicked(Button *buttonThatWasClicked)
 
 void MainContentComponent::timerCallback()
 {
-    keyboardState.allNotesOff(1);
+    std::cout<<"Timer Call Back!!"<<std::endl;
+    for (int j = 0; j<88; j++)
+        std::cout<<transcription[j]<<"\t";
+    std::cout<<std::endl;
+    
     for (int j = 0; j<88; j++) {
         if (transcription[j] == 1) {
             keyboardState.noteOn(1, j+21, 127);
+        }
+        else {
+            keyboardState.noteOff(1, j+21);
         }
     }
 }

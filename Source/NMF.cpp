@@ -13,10 +13,10 @@
 #include <fstream>
 #include <cmath>
 
-//using std::cout;
-//using std::endl;
+using std::cout;
+using std::endl;
 
-NMF::NMF(): SAMPLE_RATE(44100), DOWNSAMPLE_RATE(5), FFT_ORDER(9), FFT_SIZE(512), N_NOTES(88), BETA(0.5), NOISE_GATE(0.01), ITERATE_LIMIT(20), CONVERGE_THRESHOLD(0.01), ACTIVATION_TRESHOLD(0.15)
+NMF::NMF(): SAMPLE_RATE(44100), DOWNSAMPLE_RATE(5), FFT_ORDER(9), FFT_SIZE(512), N_NOTES(88), BETA(0.5), NOISE_GATE(0.00005), ITERATE_LIMIT(100), CONVERGE_THRESHOLD(0.01), ACTIVATION_TRESHOLD(0.15)
 {
     
     W = new float*[FFT_SIZE/2];
@@ -50,18 +50,17 @@ NMF::NMF(): SAMPLE_RATE(44100), DOWNSAMPLE_RATE(5), FFT_ORDER(9), FFT_SIZE(512),
             W[row][col] = std::stof(line);
         }
     }
-    
+
     
 //    std::fstream fout;
 //    fout.open("WW.txt", std::ios::out);
-//    for (int j = 0; j<N_NOTES; j++)
-//    {
-//        for (int i = 0; i<FFT_SIZE/2;i++) {
-//            fout<<W[i][j]<<std::endl;
+//    for (int i = 0; i<FFT_SIZE/2;i++) {
+//        for (int j = 0; j<N_NOTES; j++) {
+//            fout<<W[i][j]<<", ";
 //        }
+//        fout<<endl;
 //    }
 //    fout.close();
-    
     
     fft = new SplitRadixFFT(FFT_ORDER);
 }
@@ -107,11 +106,32 @@ void NMF::Process(float *audioSamples, float *transcription, int nSamples)
         addHammWindow(audioSamples, nSamples);
         downsampleFillBuffer(audioSamples, nSamples);
         
+//        cout<<"audioSamples: "<<endl;
+//        for (int i = 0; i<nSamples; i++) {
+//            cout<<audioSamples[i]<<"\t";
+//        }
+//        cout<<endl<<endl<<endl;
+        
         fft->XForm(fftBuffer);
         
-        for (int i = 0; i<FFT_SIZE/2; i++) {
-            v[i] = abs(fftBuffer[i]);
+//        cout<<"spectrum"<<endl;
+//        for (int i = 0; i<FFT_SIZE; i++) {
+//            cout<<fftBuffer[i]<<"\t";
+//        }
+//        cout<<endl<<endl<<endl;
+        
+        
+        // get FFT magnitude and load into v
+        v[0] = abs(fftBuffer[0]);
+        for (int i = 1; i<FFT_SIZE/2; i++) {
+            v[i] = sqrt(fftBuffer[i]*fftBuffer[i]+fftBuffer[FFT_SIZE-i]*fftBuffer[FFT_SIZE-i]);
         }
+        
+//        cout<<"v"<<endl;
+//        for (int i = 0; i<FFT_SIZE/2; i++) {
+//            cout<<v[i]<<"\t";
+//        }
+//        cout<<endl<<endl<<endl;
         
         factorize(transcription);
     }
@@ -261,6 +281,10 @@ void NMF::factorize(float* h)
             h[j] = 0;
     }
     
+//    for (int j = 0; j<N_NOTES; j++)
+//        std::cout<<h[j]<<"\t";
+//    cout<<endl;
+    cout<<"dBeta = "<<getBetaDivergence(h)<<endl;
 }
 
 
@@ -299,9 +323,16 @@ float NMF::getBetaDivergence(float *h)
     
     // db = sum( 1/(beta*(beta-1)) * ( x.^beta + (beta-1)*y.^beta - beta.*x.*y.^(beta-1) ) );
     else {
+//        for (int i = 0; i<FFT_SIZE/2; i++) {
+//            cout<<v[i]<<"\t";
+//        }
+        
         for (int i=0; i<FFT_SIZE/2; i++) {
+//            cout<<v[i]<<"\t";
             db += 1/(BETA*(BETA-1)) * ( pow(v[i], BETA) + (BETA-1)*pow(W_h[i], BETA) - BETA*v[i]*pow(W_h[i], BETA-1) );
+//            cout<<db<<endl;
         }
     }
+    
     return db;
 }

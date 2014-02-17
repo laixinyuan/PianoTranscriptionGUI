@@ -62,6 +62,11 @@ void AudioFileSource::audioDeviceIOCallback(const float** inputChannelData,
     {
         loadBuffer();
         nmf->Process(nmfBuffer, transcription, RECORD_SIZE);
+        
+//        for (int j = 0; j<88; j++)
+//            std::cout<<transcription[j]<<"\t";
+//        std::cout<<std::endl;
+        
         bufferReady = false;
     }
     
