@@ -26,7 +26,7 @@
 class LiveStreaming: public AudioIODeviceCallback
 {
 public:
-    LiveStreaming(AudioDeviceManager& deviceManager, NMF* nmf_);
+    LiveStreaming(AudioDeviceManager& deviceManager, NMF* nmf_, float* transcription_);
     ~LiveStreaming();
     
     void audioDeviceIOCallback (const float **inputChannelData, int numInputChannels, float **outputChannelData, int numOutputChannels, int numSamples);
@@ -34,8 +34,6 @@ public:
     void audioDeviceStopped();
     
     void loadBuffer();
-    
-    float* transcription;
     
 private:
     AudioDeviceManager& deviceManager;
@@ -45,7 +43,7 @@ private:
     AudioSampleBuffer tempBuffer   = AudioSampleBuffer(1, RECORD_SIZE);
     
     NMF* nmf;
-//    float* transcription;
+    float* transcription;
     float* nmfBuffer;
     
     bool bufferReady;

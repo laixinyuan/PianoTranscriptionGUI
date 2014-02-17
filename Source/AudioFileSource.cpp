@@ -8,7 +8,7 @@
 
 #include "AudioFileSource.h"
 
-AudioFileSource::AudioFileSource(AudioDeviceManager& deviceManager_, NMF* nmf_):deviceManager(deviceManager_), playingThread("file audio IO")
+AudioFileSource::AudioFileSource(AudioDeviceManager& deviceManager_, NMF* nmf_, float* transcription_):deviceManager(deviceManager_), playingThread("file audio IO")
 {
     AudioDeviceManager::AudioDeviceSetup config;
     deviceManager.getAudioDeviceSetup(config);
@@ -25,7 +25,7 @@ AudioFileSource::AudioFileSource(AudioDeviceManager& deviceManager_, NMF* nmf_):
     bufferIndex = 0;
     
     nmf = nmf_;
-    transcription = new float[nmf->getNumNotes()];
+    transcription = transcription_;
     nmfBuffer = new float[RECORD_SIZE];
     
 }
@@ -38,8 +38,7 @@ AudioFileSource::~AudioFileSource()
     audioSourcePlayer.setSource(0);
     
     nmf = nullptr;
-//    transcription = nullptr;
-    delete [] transcription;
+    transcription = nullptr;
     delete [] nmfBuffer;
 }
 

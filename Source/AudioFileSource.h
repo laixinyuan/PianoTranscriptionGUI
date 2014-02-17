@@ -27,7 +27,7 @@
 class AudioFileSource : public AudioIODeviceCallback
 {
 public:
-    AudioFileSource(AudioDeviceManager& deviceManager, NMF* nmf_);
+    AudioFileSource(AudioDeviceManager& deviceManager, NMF* nmf_, float* transcription_);
     ~AudioFileSource();
     void audioDeviceIOCallback(const float** inputChannelData,
 							   int totalNumInputChannels,
@@ -40,7 +40,6 @@ public:
     
     void loadBuffer();
     
-    float* transcription;
 private:
     
     AudioDeviceManager& deviceManager;                          // global device manager
@@ -56,6 +55,7 @@ private:
     
     NMF* nmf;
     float* nmfBuffer;
+    float* transcription;
     
     bool bufferReady;
     int bufferIndex;
