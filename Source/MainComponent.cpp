@@ -10,7 +10,7 @@
 
 
 //==============================================================================
-MainContentComponent::MainContentComponent()
+MainContentComponent::MainContentComponent():midiLogListBoxModel (midiMessageList)
 {
     
     deviceManager.initialise(2, 2, 0, true);
@@ -42,6 +42,11 @@ MainContentComponent::MainContentComponent()
     keyboardUI->setColour(MidiKeyboardComponent::keyDownOverlayColourId, Colours::mediumseagreen);
     keyboardUI->setColour(MidiKeyboardComponent::mouseOverKeyOverlayColourId, Colours::mediumseagreen);
     
+    addAndMakeVisible(messageListBox = new ListBox());
+    messageListBox->setModel (&midiLogListBoxModel);
+    messageListBox->setColour (ListBox::backgroundColourId, Colour (0x32ffffff));
+    messageListBox->setColour (ListBox::outlineColourId, Colours::black);
+    
     setSize (1080, 720);
     
     startTimer(10);
@@ -54,6 +59,8 @@ MainContentComponent::~MainContentComponent()
     streamButton = nullptr;
     loadFileButton = nullptr;
     
+    messageListBox = nullptr;
+    
     keyboardUI = nullptr;
     
     streaming = nullptr;
@@ -65,7 +72,7 @@ MainContentComponent::~MainContentComponent()
 
 void MainContentComponent::paint (Graphics& g)
 {
-    g.fillAll (Colour (48,48,48));
+    g.fillAll (Colour (0x24affffff));
 
 //    g.setFont (Font (16.0f));
 //    g.setColour (Colours::black);
@@ -83,7 +90,8 @@ void MainContentComponent::resized()
     title->setBounds (getWidth()/2-160, 20, 400, 200);
     streamButton->setBounds (getWidth()/8, getHeight()/4-80, 120, 30);
     loadFileButton->setBounds (getWidth()/8 + 120, getHeight()/4-80, 120, 30);
-    keyboardUI ->setBounds(getWidth()/8-30, getHeight()/2 + 10, 900, getHeight()/2 - 70);
+    keyboardUI->setBounds(getWidth()/8-30, getHeight()/2 -200, 925, getHeight()/2 - 200);
+    messageListBox->setBounds(getWidth()/8-30, getHeight()/2 , 925, getHeight()/2 -30);
     
 }
 
