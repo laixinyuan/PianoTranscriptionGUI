@@ -16,7 +16,7 @@
 using std::cout;
 using std::endl;
 
-NMF::NMF(): SAMPLE_RATE(44100), DOWNSAMPLE_RATE(5), FFT_ORDER(9), FFT_SIZE(512), N_NOTES(88), BETA(0.5), NOISE_GATE(0.001), ITERATE_LIMIT(30), CONVERGE_THRESHOLD(0.01), ACTIVATION_TRESHOLD(0.15)
+NMF::NMF(): SAMPLE_RATE(44100), DOWNSAMPLE_RATE(5), FFT_ORDER(9), FFT_SIZE(512), N_NOTES(88), BETA(0.5), NOISE_GATE(0.001), ITERATE_LIMIT(30), CONVERGE_THRESHOLD(0.01), ACTIVATION_TRESHOLD(0.2)
 {
     
     W = new float*[FFT_SIZE/2];
@@ -211,14 +211,14 @@ void NMF::factorize(float* h)
             numerator[j] = 0;
             for (int i = 0; i<FFT_SIZE/2; i++) {
 //                numerator[j] += W_v_eT[i][j] * pow(W_h[i], BETA-2.0);
-                numerator[j] += W_v_eT[i][j] * powMinus1_5(W_h[i]);
+                numerator[j] += W_v_eT[i][j] * powMinus1_5(W_h[i]);   // hard coding for efficiency
             }
             
             // ( W'*(W*h).^(beta-1))
             denominator[j] = 0;
             for (int i = 0; i<FFT_SIZE/2; i++) {
 //                denominator[j] += W[i][j] * pow(W_h[i], BETA-1.0);
-                denominator[j] += W[i][j] * powMinus0_5(W_h[i]);
+                denominator[j] += W[i][j] * powMinus0_5(W_h[i]);  // hard coding for efficiency
             }
             
             // h = h.* ( ( W_v_eT'* (W*h).^(beta-2) ) ./ ( W'*(W*h).^(beta-1)) );
@@ -228,8 +228,8 @@ void NMF::factorize(float* h)
         
     }
     
+    addHammWindow(h, N_NOTES);
 
-    
 //    cout<<"dBeta = "<<getBetaDivergence(h)<<endl;
     
     if (getBetaDivergence(h)) {
@@ -298,7 +298,7 @@ float NMF::getBetaDivergence(float *h)
         
         for (int i=0; i<FFT_SIZE/2; i++) {
 //            db += 1/(BETA*(BETA-1)) * ( pow(v[i], BETA) + (BETA-1)*pow(W_h[i], BETA) - BETA*v[i]*pow(W_h[i], BETA-1) );
-            db += 1/(BETA*(BETA-1)) * ( pow0_5(v[i]) + (BETA-1)*pow0_5(W_h[i]) - BETA*v[i]*powMinus0_5(W_h[i]) );
+            db += 1/(BETA*(BETA-1)) * ( pow0_5(v[i]) + (BETA-1)*pow0_5(W_h[i]) - BETA*v[i]*powMinus0_5(W_h[i]) );    // hard coding for efficiency
 
         }
     }

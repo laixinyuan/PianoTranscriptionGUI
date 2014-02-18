@@ -18,7 +18,7 @@ MainContentComponent::MainContentComponent()
     nmf = new NMF();
     transcription = new float[88];  // hard coded
     
-    addAndMakeVisible (title = new Label (String::empty, "Real-time Polyphonic "));
+    addAndMakeVisible (title = new Label (String::empty, "Real-time Polyphonic Piano Transcription"));
     title->setFont (Font (28.00f, Font::bold));
     title->setJustificationType (Justification::topLeft);
     title->setEditable (false, false, false);

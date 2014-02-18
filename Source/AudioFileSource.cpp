@@ -65,19 +65,6 @@ void AudioFileSource::audioDeviceIOCallback(const float** inputChannelData,
         loadBuffer();
         nmf->Process(nmfBuffer, h, RECORD_SIZE);
         memcpy(transcription, h, nmf->getNumNotes()*sizeof(float));
-//        for (int j = 0; j<nmf->getNumNotes(); j++) {
-//            transcription[j] = h[j];
-//        }
-        
-//        for (int j = 0; j<88; j++)
-//            std::cout<<transcription[j]<<"\t";
-//        std::cout<<std::endl;
-        
-//        std::cout<<"Process complete"<<std::endl;
-//        for (int j = 0; j<88; j++) {
-//            std::cout<<h[j]<<"\t";
-//        }
-//        std::cout<<std::endl<<std::endl;
         
         bufferReady = false;
     }
