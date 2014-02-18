@@ -22,13 +22,22 @@ AudioFileSource::AudioFileSource(AudioDeviceManager& deviceManager_, NMF* nmf_, 
     playingThread.startThread();
     
     bufferReady = false;
-    bufferIndex = 0;
     
     nmf = nmf_;
     transcription = transcription_;
-    nmfBuffer = new float[RECORD_SIZE];
-    h = new float[nmf->getNumNotes()];
     
+    N_NOTES = nmf->getNumNotes();
+    
+    nmfBuffer = new float[RECORD_SIZE];
+    h   = new float[N_NOTES];
+    hp  = new float[N_NOTES];
+    hpp = new float[N_NOTES];
+    
+    for (int j = 0; j<N_NOTES; j++) {
+        h[j] = 0;
+        hp[j] = 0;
+        hpp[j] = 0;
+    }
 }
 
 AudioFileSource::~AudioFileSource()
@@ -42,6 +51,8 @@ AudioFileSource::~AudioFileSource()
     transcription = nullptr;
     delete [] nmfBuffer;
     delete [] h;
+    delete [] hp;
+    delete [] hpp;
 }
 
 void AudioFileSource::setFile(File audioFile)
@@ -64,7 +75,14 @@ void AudioFileSource::audioDeviceIOCallback(const float** inputChannelData,
     {
         loadBuffer();
         nmf->Process(nmfBuffer, h, RECORD_SIZE);
-        memcpy(transcription, h, nmf->getNumNotes()*sizeof(float));
+        
+        // median filter
+        for (int j = 0; j<N_NOTES; j++) {
+            transcription[j] = getMedian(h[j], hp[j], hpp[j]);
+        }
+        
+        memcpy(hpp, hp, N_NOTES*sizeof(float));
+        memcpy(hp,  h,  N_NOTES*sizeof(float));
         
         bufferReady = false;
     }
@@ -81,6 +99,11 @@ void AudioFileSource::audioDeviceIOCallback(const float** inputChannelData,
         sampleBuffer.clear();
     }
     
+//    calculateBuffer.copyFrom(0, 0, outputChannelData[0], numSamples);
+//    loadBuffer();
+//    nmf->Process(nmfBuffer, h, RECORD_SIZE);
+//    memcpy(transcription, h, N_NOTES*sizeof(float));
+    
     audioSourcePlayer.audioDeviceIOCallback (inputChannelData, totalNumInputChannels, outputChannelData, totalNumOutputChannels, numSamples);
     
 }
@@ -91,6 +114,16 @@ void AudioFileSource::loadBuffer()
     for (int i = 0; i<RECORD_SIZE; i++) {
         nmfBuffer[i] = calBuffer[i];
     }
+}
+
+float AudioFileSource::getMedian(float a, float b, float c)
+{
+    if ( (a - b) * (c - a) >= 0 ) // a >= b and a <= c OR a <= b and a >= c
+        return a;
+    else if ( (b - a) * (c - b) >= 0 ) // b >= a and b <= c OR b <= a and b >= c
+        return b;
+    else
+        return c;
 }
 
 void AudioFileSource::audioDeviceAboutToStart(AudioIODevice* device)

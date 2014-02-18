@@ -35,6 +35,8 @@ public:
     
     void loadBuffer();
     
+    float getMedian(float a, float b, float c);
+    
 private:
     AudioDeviceManager& deviceManager;
     TimeSliceThread liveStreamingThread;
@@ -45,11 +47,13 @@ private:
     NMF* nmf;
     float* transcription;
     float* nmfBuffer;
-    float* h;
+    float* h;             // intermediate resultes
+    float* hp;
+    float* hpp;
     
     bool bufferReady;
     bool streamingAlive;
-    int bufferIndex;
+    int N_NOTES;
 };
 
 #endif /* defined(__PianoTranscriptionGUI__LiveStreaming__) */

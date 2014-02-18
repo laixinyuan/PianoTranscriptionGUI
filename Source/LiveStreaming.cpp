@@ -21,8 +21,11 @@ LiveStreaming::LiveStreaming(AudioDeviceManager& deviceManager_, NMF* nmf_, floa
     
     nmf = nmf_;
     transcription = transcription_;
+    N_NOTES = nmf->getNumNotes();
     nmfBuffer = new float[RECORD_SIZE];
-    h = new float[nmf->getNumNotes()];
+    h = new float[N_NOTES];
+    hp = new float[N_NOTES];
+    hpp = new float[N_NOTES];
 
 }
 
@@ -34,6 +37,8 @@ LiveStreaming::~LiveStreaming()
     transcription = nullptr;
     delete [] nmfBuffer;
     delete [] h;
+    delete [] hp;
+    delete [] hpp;
 }
 
 void LiveStreaming::audioDeviceAboutToStart(AudioIODevice* device)
@@ -58,16 +63,15 @@ void LiveStreaming::audioDeviceIOCallback( const float** inputChannelData,
     {
         loadBuffer();
         nmf->Process(nmfBuffer, h, RECORD_SIZE);
-        memcpy(transcription, h, nmf->getNumNotes()*sizeof(float));
-//        for (int j = 0; j<nmf->getNumNotes(); j++) {
-//            transcription[j] = h[j];
-//        }
         
-//        std::cout<<"Process complete"<<std::endl;
-//        for (int j = 0; j<88; j++) {
-//            std::cout<<transcription[j]<<"\t";
-//        }
-//        std::cout<<std::endl<<std::endl;
+        // median filter
+        for (int j = 0; j<N_NOTES; j++) {
+            transcription[j] = getMedian(h[j], hp[j], hpp[j]);
+        }
+        
+        memcpy(hpp, hp, N_NOTES*sizeof(float));
+        memcpy(hp,  h,  N_NOTES*sizeof(float));
+
         
         bufferReady = false;
     }
@@ -97,4 +101,14 @@ void LiveStreaming::loadBuffer()
     for (int i = 0; i<RECORD_SIZE; i++) {
         nmfBuffer[i] = calBuffer[i];
     }
+}
+
+float LiveStreaming::getMedian(float a, float b, float c)
+{
+    if ( (a - b) * (c - a) >= 0 ) // a >= b and a <= c OR a <= b and a >= c
+        return a;
+    else if ( (b - a) * (c - b) >= 0 ) // b >= a and b <= c OR b <= a and b >= c
+        return b;
+    else
+        return c;
 }

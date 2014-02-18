@@ -39,6 +39,7 @@ public:
     void setFile(File audioFile);
     
     void loadBuffer();
+    float getMedian(float a, float b, float c);
     
 private:
     
@@ -57,9 +58,11 @@ private:
     float* nmfBuffer;
     float* transcription; // final results
     float* h;             // intermediate resultes
+    float* hp;
+    float* hpp;
     
     bool bufferReady;
-    int bufferIndex;
+    int N_NOTES;
     
 };
 
