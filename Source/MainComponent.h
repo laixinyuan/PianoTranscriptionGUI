@@ -73,6 +73,8 @@ public:
         }
     }
     
+    
+    
 private:
     const Array<MidiMessage>& midiMessageList;
     
@@ -99,6 +101,25 @@ public:
     
     void buttonClicked(Button* buttonThatWasClicked);
     
+    
+//    struct IncomingMessageCallback   : public CallbackMessage
+//    {
+//        IncomingMessageCallback (MainContentComponent* mcc, const MidiMessage& m)
+//        : mainComponent(mcc), message (m) {}
+//        
+//        void messageCallback() override
+//        {
+//        if (mainComponent != nullptr)
+//            mainComponent->addMessageToList (message);
+//        }
+//    
+//        Component::SafePointer<MainContentComponent> mainComponent;
+//        MidiMessage message;
+//    };
+
+    
+
+
 private:
     AudioDeviceManager deviceManager;
     File currentFile;
@@ -110,6 +131,9 @@ private:
     ScopedPointer<ListBox> messageListBox;
     Array<MidiMessage> midiMessageList;
     MidiLogListBoxModel midiLogListBoxModel;
+    MidiMessage midiMsg;
+    double startTime;
+    double sysTime;
     
     MidiKeyboardState keyboardState;
     ScopedPointer<MidiKeyboardComponent> keyboardUI;
@@ -119,6 +143,9 @@ private:
     
     NMF* nmf;
     float* transcription;
+    float* previousTranscription;
+    
+    
     
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)

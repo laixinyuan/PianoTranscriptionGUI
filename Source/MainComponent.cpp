@@ -7,7 +7,7 @@
 */
 
 #include "MainComponent.h"
-
+#include <ctime>
 
 //==============================================================================
 MainContentComponent::MainContentComponent():midiLogListBoxModel (midiMessageList)
@@ -17,6 +17,7 @@ MainContentComponent::MainContentComponent():midiLogListBoxModel (midiMessageLis
     
     nmf = new NMF();
     transcription = new float[88];  // hard coded
+    previousTranscription = new float[88];
     
     addAndMakeVisible (title = new Label (String::empty, "Real-time Polyphonic Piano Transcription"));
     title->setFont (Font (28.00f, Font::bold));
@@ -44,7 +45,7 @@ MainContentComponent::MainContentComponent():midiLogListBoxModel (midiMessageLis
     
     addAndMakeVisible(messageListBox = new ListBox());
     messageListBox->setModel (&midiLogListBoxModel);
-    messageListBox->setColour (ListBox::backgroundColourId, Colour (0x32ffffff));
+    messageListBox->setColour (ListBox::backgroundColourId, Colour (0x48ffffff));
     messageListBox->setColour (ListBox::outlineColourId, Colours::black);
     
     setSize (1080, 720);
@@ -68,11 +69,14 @@ MainContentComponent::~MainContentComponent()
     
     delete nmf;
     delete [] transcription;
+    delete [] previousTranscription;
 }
 
 void MainContentComponent::paint (Graphics& g)
 {
-    g.fillAll (Colour (0x24affffff));
+    g.fillAll (Colour (0x00ffffff));
+    
+//    midiLogListBoxModel.paintListBoxItem(1, g, 5, 5, true);
 
 //    g.setFont (Font (16.0f));
 //    g.setColour (Colours::black);
@@ -97,6 +101,7 @@ void MainContentComponent::resized()
 
 void MainContentComponent::buttonClicked(Button *buttonThatWasClicked)
 {
+    startTime = time(0);
     
     if (buttonThatWasClicked == streamButton)
     {
@@ -139,15 +144,31 @@ void MainContentComponent::buttonClicked(Button *buttonThatWasClicked)
 
 void MainContentComponent::timerCallback()
 {
-    
+    sysTime = time(0) - startTime;
     for (int j = 0; j<88; j++) {
-        if (transcription[j] == 1) {
+        if (previousTranscription[j] == 0 && transcription[j] == 1) {
             keyboardState.noteOn(1, j+21, 127);
+            midiMsg = MidiMessage::noteOn(1, j+21, (uint8)127);
+            midiMsg.setTimeStamp(sysTime);
+            midiMessageList.add(midiMsg);
+            messageListBox->updateContent();
+            messageListBox->scrollToEnsureRowIsOnscreen (midiMessageList.size() - 1);
+            messageListBox->repaint();
+            
         }
-        else {
+        else if (previousTranscription[j] == 1 && transcription[j] == 0) {
             keyboardState.noteOff(1, j+21);
+            midiMsg = MidiMessage::noteOff(1, j+21);
+            midiMsg.setTimeStamp(sysTime);
+            midiMessageList.add(midiMsg);
+            messageListBox->updateContent();
+            messageListBox->scrollToEnsureRowIsOnscreen (midiMessageList.size() - 1);
+            messageListBox->repaint();
+            
         }
     }
+    
+    memcpy(previousTranscription, transcription, 88*sizeof(float));
 }
 
 
