@@ -13,6 +13,7 @@
 #include "NMF.h"
 #include "AudioFileSource.h"
 #include "LiveStreaming.h"
+#include <ctime>
 
 static String getMidiMessageDescription (const MidiMessage& m)
 {
@@ -132,8 +133,8 @@ private:
     Array<MidiMessage> midiMessageList;
     MidiLogListBoxModel midiLogListBoxModel;
     MidiMessage midiMsg;
-    double startTime;
-    double sysTime;
+    clock_t startTime;
+    double elapsedTimeInSecs;
     
     MidiKeyboardState keyboardState;
     ScopedPointer<MidiKeyboardComponent> keyboardUI;

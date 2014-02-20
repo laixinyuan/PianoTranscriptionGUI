@@ -7,7 +7,6 @@
 */
 
 #include "MainComponent.h"
-#include <ctime>
 
 //==============================================================================
 MainContentComponent::MainContentComponent():midiLogListBoxModel (midiMessageList)
@@ -101,7 +100,7 @@ void MainContentComponent::resized()
 
 void MainContentComponent::buttonClicked(Button *buttonThatWasClicked)
 {
-    startTime = time(0);
+    startTime = clock();
     
     if (buttonThatWasClicked == streamButton)
     {
@@ -144,12 +143,12 @@ void MainContentComponent::buttonClicked(Button *buttonThatWasClicked)
 
 void MainContentComponent::timerCallback()
 {
-    sysTime = time(0) - startTime;
+    elapsedTimeInSecs = (clock() - startTime) / CLOCKS_PER_SEC;
     for (int j = 0; j<88; j++) {
         if (previousTranscription[j] == 0 && transcription[j] == 1) {
             keyboardState.noteOn(1, j+21, 127);
             midiMsg = MidiMessage::noteOn(1, j+21, (uint8)127);
-            midiMsg.setTimeStamp(sysTime);
+            midiMsg.setTimeStamp(elapsedTimeInSecs);
             midiMessageList.add(midiMsg);
             messageListBox->updateContent();
             messageListBox->scrollToEnsureRowIsOnscreen (midiMessageList.size() - 1);
@@ -159,7 +158,7 @@ void MainContentComponent::timerCallback()
         else if (previousTranscription[j] == 1 && transcription[j] == 0) {
             keyboardState.noteOff(1, j+21);
             midiMsg = MidiMessage::noteOff(1, j+21);
-            midiMsg.setTimeStamp(sysTime);
+            midiMsg.setTimeStamp(elapsedTimeInSecs);
             midiMessageList.add(midiMsg);
             messageListBox->updateContent();
             messageListBox->scrollToEnsureRowIsOnscreen (midiMessageList.size() - 1);
